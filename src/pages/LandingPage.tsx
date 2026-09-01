@@ -30,6 +30,11 @@ import {
   HeartHandshake,
   Star,
   Users,
+  Menu,
+  X,
+  Compass,
+  LayoutDashboard,
+  ExternalLink,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -42,6 +47,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from '@/components/ui/sheet'
 import { getProperties, getPropertyImageUrl } from '@/services/properties'
 import PropertyDetailModal from '@/components/PropertyDetailModal'
 import FloatingWhatsApp, {
@@ -53,7 +66,6 @@ import FloatingWhatsApp, {
 } from '@/components/FloatingWhatsApp'
 import { ClientOnboardingModal } from '@/components/ClientOnboardingModal'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Compass, HelpCircle } from 'lucide-react'
 import type { Property } from '@/types'
 
 const SERVICES_LIST = [
@@ -120,6 +132,7 @@ export default function LandingPage() {
   const [selectedPropertyForModal, setSelectedPropertyForModal] = useState<Property | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [clientGuideOpen, setClientGuideOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -149,101 +162,275 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] text-[#1A3636] flex flex-col selection:bg-[#D4AF37] selection:text-[#1A3636]">
-      {/* Top Notice Bar */}
-      <div className="bg-[#142A2A] text-white py-2 px-4 text-center text-xs border-b border-[#D4AF37]/30 flex flex-wrap items-center justify-center gap-x-6 gap-y-1">
-        <span className="flex items-center gap-1 text-[#D4AF37] font-semibold">
-          <Award className="w-3.5 h-3.5" /> CRECI 38415 — Corretora Vera Lúcia Koren
-        </span>
-        <span className="hidden sm:inline text-white/50">•</span>
-        <span className="text-white/80">Foxter Cia. Imobiliária — Porto Alegre - RS</span>
-        <span className="hidden sm:inline text-white/50">•</span>
-        <a
-          href={getWhatsAppUrl(
-            'Olá Vera Lúcia! Gostaria de conversar sobre imóveis em Porto Alegre.',
-          )}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[#25D366] hover:underline flex items-center gap-1 font-semibold"
-        >
-          <MessageCircle className="w-3.5 h-3.5" /> (51) 99132-7636
-        </a>
+      {/* Top Utility Bar - Clean, discrete & elegant */}
+      <div className="bg-[#102222] text-white/80 text-[11px] sm:text-xs border-b border-[#2A4D4D]/60 py-1.5 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          {/* Left: Official Credential & Agency in one discreet line */}
+          <div className="flex items-center gap-2 text-white/70 overflow-hidden text-ellipsis whitespace-nowrap">
+            <span className="inline-flex items-center gap-1 text-[#D4AF37] font-semibold shrink-0">
+              <Award className="w-3.5 h-3.5 shrink-0" /> CRECI 38415
+            </span>
+            <span className="text-white/30">•</span>
+            <span className="hidden sm:inline text-white/80 font-medium">
+              Foxter Cia. Imobiliária
+            </span>
+            <span className="hidden md:inline text-white/30">•</span>
+            <span className="hidden md:inline text-white/60">Porto Alegre - RS</span>
+          </div>
+
+          {/* Right: Direct Contact WhatsApp */}
+          <div className="flex items-center gap-3 shrink-0">
+            <a
+              href={getWhatsAppUrl(
+                'Olá Vera Lúcia! Gostaria de falar sobre imóveis em Porto Alegre.',
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#25D366] hover:text-[#42f584] transition-colors flex items-center gap-1.5 font-semibold text-xs group"
+              title="Conversar diretamente pelo WhatsApp"
+            >
+              <MessageCircle className="w-3.5 h-3.5 fill-current" />
+              <span className="font-medium tracking-wide">(51) 99132-7636</span>
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* Main Header / Navigation */}
-      <header className="sticky top-0 z-40 bg-[#1A3636]/95 backdrop-blur-md border-b border-[#2A4D4D] text-white py-3.5 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full border-2 border-[#D4AF37] overflow-hidden bg-white/10 shrink-0">
-              <img
-                src="https://img.usecurling.com/ppl/128?gender=female&seed=44"
-                alt="Vera Lúcia Koren"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+      <header className="sticky top-0 z-40 bg-[#1A3636]/95 backdrop-blur-md border-b border-[#2A4D4D] text-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-18 sm:h-20 flex items-center justify-between gap-4">
+          {/* Brand / Broker Identity */}
+          <Link
+            to="/"
+            className="flex items-center gap-3 sm:gap-3.5 group shrink-0 focus:outline-hidden"
+            aria-label="Página inicial Vera Lúcia Koren"
+          >
+            <div className="relative">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full ring-2 ring-[#D4AF37] ring-offset-2 ring-offset-[#1A3636] overflow-hidden bg-white/10 shrink-0 transition-transform group-hover:scale-105 shadow-md">
+                <img
+                  src="https://img.usecurling.com/ppl/128?gender=female&seed=44"
+                  alt="Vera Lúcia Koren"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span
+                className="absolute bottom-0 right-0 w-3 h-3 bg-[#25D366] rounded-full border-2 border-[#1A3636]"
+                title="Online"
               />
             </div>
-            <div>
+
+            <div className="flex flex-col justify-center">
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-base tracking-wider text-white">
+                <span className="font-extrabold text-base sm:text-lg tracking-wide text-white leading-tight group-hover:text-[#D4AF37] transition-colors">
                   VERA LÚCIA KOREN
                 </span>
-                <Badge className="bg-[#D4AF37] text-[#1A3636] font-bold text-[10px] px-1.5 py-0">
-                  CRECI 38415
-                </Badge>
               </div>
-              <p className="text-[11px] text-[#D4AF37] font-medium tracking-wide">
-                Foxter Cia. Imobiliária • Porto Alegre - RS
-              </p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-[11px] text-[#D4AF37] font-semibold tracking-wide">
+                  Foxter Imobiliária
+                </span>
+                <span className="text-white/40 text-[10px]">•</span>
+                <span className="text-[10px] text-white/70 font-normal">Alto Padrão POA</span>
+              </div>
             </div>
           </Link>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-white/80">
-            <a href="#imoveis" className="hover:text-[#D4AF37] transition-colors">
-              Imóveis em Destaque
+          {/* Desktop Navigation Links (Clean, spaced, uncluttered) */}
+          <nav
+            className="hidden lg:flex items-center gap-7 text-sm font-medium text-white/80"
+            aria-label="Navegação principal"
+          >
+            <a
+              href="#imoveis"
+              className="hover:text-[#D4AF37] transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#D4AF37] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
+            >
+              Imóveis
             </a>
-            <a href="#sobre" className="hover:text-[#D4AF37] transition-colors">
+            <a
+              href="#sobre"
+              className="hover:text-[#D4AF37] transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#D4AF37] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
+            >
               Sobre a Vera
             </a>
-            <a href="#servicos" className="hover:text-[#D4AF37] transition-colors">
-              Serviços & Financiamento
+            <a
+              href="#servicos"
+              className="hover:text-[#D4AF37] transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#D4AF37] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
+            >
+              Serviços
             </a>
-            <a href="#contato" className="hover:text-[#D4AF37] transition-colors">
+            <a
+              href="#contato"
+              className="hover:text-[#D4AF37] transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#D4AF37] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
+            >
               Contato
             </a>
             <button
               onClick={() => setClientGuideOpen(true)}
-              className="text-xs text-[#D4AF37] hover:text-white flex items-center gap-1 font-medium transition-colors"
+              className="text-xs font-semibold text-[#D4AF37] hover:text-amber-300 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-[#D4AF37]/30 hover:border-[#D4AF37] transition-all cursor-pointer"
             >
-              <Compass className="w-3.5 h-3.5" /> Como Comprar
+              <Compass className="w-3.5 h-3.5 text-[#D4AF37]" />
+              Como Comprar
             </button>
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setClientGuideOpen(true)}
-              className="md:hidden text-[#D4AF37] hover:bg-white/10 text-xs px-2"
-            >
-              <Compass className="w-4 h-4 mr-1" /> Guia
-            </Button>
+          {/* Primary Action Button & Mobile Hamburger Trigger */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Main Primary CTA - Always stands out */}
             <Link to="/agendar">
               <Button
                 size="sm"
-                className="bg-[#D4AF37] hover:bg-[#c49f2e] text-[#1A3636] font-bold text-xs shadow-md gap-1.5"
+                className="bg-[#D4AF37] hover:bg-[#c49f2e] text-[#1A3636] font-extrabold text-xs sm:text-sm px-4 sm:px-5 py-2 h-9 sm:h-10 rounded-lg shadow-lg hover:shadow-xl shadow-[#D4AF37]/20 transition-all gap-1.5 cursor-pointer active:scale-95"
               >
-                <CalendarDays className="w-3.5 h-3.5" />
-                Agendar Visita
+                <CalendarDays className="w-4 h-4 shrink-0 text-[#1A3636]" />
+                <span>Agendar Visita</span>
               </Button>
             </Link>
-            <Link to="/crm" className="hidden lg:inline-flex">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-white/20 text-white hover:bg-white/10 text-xs"
+
+            {/* Mobile / Tablet Hamburger Menu Trigger */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="lg:hidden h-9 w-9 sm:h-10 sm:w-10 border-[#2A4D4D] bg-[#142A2A]/80 text-white hover:bg-white/10 hover:text-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]"
+                  aria-label="Abrir menu de navegação"
+                >
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="right"
+                className="w-[85vw] max-w-sm bg-[#142A2A] text-white border-l border-[#2A4D4D] p-0 flex flex-col justify-between"
               >
-                Painel Gestão
-              </Button>
-            </Link>
+                <div className="p-6 space-y-6">
+                  {/* Sheet Header / Profile summary */}
+                  <SheetHeader className="text-left space-y-3 pb-4 border-b border-white/10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full border-2 border-[#D4AF37] overflow-hidden bg-white/10 shrink-0">
+                        <img
+                          src="https://img.usecurling.com/ppl/128?gender=female&seed=44"
+                          alt="Vera Lúcia Koren"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <SheetTitle className="text-white font-black text-base tracking-wide">
+                          VERA LÚCIA KOREN
+                        </SheetTitle>
+                        <p className="text-xs text-[#D4AF37] font-medium">
+                          CRECI 38415 • Foxter Imobiliária
+                        </p>
+                        <p className="text-[11px] text-white/60">Porto Alegre - RS</p>
+                      </div>
+                    </div>
+                  </SheetHeader>
+
+                  {/* Nav Links */}
+                  <div className="space-y-1 text-sm">
+                    <p className="text-[11px] uppercase tracking-wider text-[#D4AF37]/80 font-bold px-3 py-1">
+                      Navegação
+                    </p>
+                    <a
+                      href="#imoveis"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-between px-3 py-2.5 rounded-lg text-white/90 hover:bg-white/10 hover:text-[#D4AF37] transition-colors"
+                    >
+                      <span className="font-medium">Imóveis em Destaque</span>
+                      <ChevronRight className="w-4 h-4 text-white/40" />
+                    </a>
+                    <a
+                      href="#sobre"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-between px-3 py-2.5 rounded-lg text-white/90 hover:bg-white/10 hover:text-[#D4AF37] transition-colors"
+                    >
+                      <span className="font-medium">Sobre a Vera</span>
+                      <ChevronRight className="w-4 h-4 text-white/40" />
+                    </a>
+                    <a
+                      href="#servicos"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-between px-3 py-2.5 rounded-lg text-white/90 hover:bg-white/10 hover:text-[#D4AF37] transition-colors"
+                    >
+                      <span className="font-medium">Serviços & Financiamento</span>
+                      <ChevronRight className="w-4 h-4 text-white/40" />
+                    </a>
+                    <a
+                      href="#contato"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-between px-3 py-2.5 rounded-lg text-white/90 hover:bg-white/10 hover:text-[#D4AF37] transition-colors"
+                    >
+                      <span className="font-medium">Contato</span>
+                      <ChevronRight className="w-4 h-4 text-white/40" />
+                    </a>
+
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false)
+                        setClientGuideOpen(true)
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-colors text-left"
+                    >
+                      <span className="font-semibold flex items-center gap-2">
+                        <Compass className="w-4 h-4" /> Como Comprar Imóvel
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-[#D4AF37]/60" />
+                    </button>
+                  </div>
+
+                  {/* Portals & Internal Access */}
+                  <div className="space-y-1 text-sm pt-2 border-t border-white/10">
+                    <p className="text-[11px] uppercase tracking-wider text-[#D4AF37]/80 font-bold px-3 py-1">
+                      Área do Cliente & Gestão
+                    </p>
+                    <Link
+                      to="/portal"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-between px-3 py-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                    >
+                      <span>Portal do Cliente</span>
+                      <ChevronRight className="w-4 h-4 text-white/40" />
+                    </Link>
+                    <Link
+                      to="/crm"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-between px-3 py-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <LayoutDashboard className="w-3.5 h-3.5 text-white/50" /> Painel de Gestão
+                        (CRM)
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-white/40" />
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Sheet Bottom Actions */}
+                <div className="p-6 bg-[#102222] border-t border-white/10 space-y-3">
+                  <Link
+                    to="/agendar"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full"
+                  >
+                    <Button className="w-full bg-[#D4AF37] hover:bg-[#c49f2e] text-[#1A3636] font-bold py-2.5 rounded-xl gap-2 shadow-md">
+                      <CalendarDays className="w-4 h-4" /> Agendar Visita Oficial
+                    </Button>
+                  </Link>
+                  <a
+                    href={getWhatsAppUrl('Olá Vera Lúcia! Gostaria de falar sobre imóveis.')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full"
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full border-[#25D366]/40 text-[#25D366] hover:bg-[#25D366]/10 font-bold py-2.5 rounded-xl gap-2"
+                    >
+                      <MessageCircle className="w-4 h-4 fill-[#25D366]" /> (51) 99132-7636
+                    </Button>
+                  </a>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
