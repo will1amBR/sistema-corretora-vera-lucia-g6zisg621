@@ -34,7 +34,8 @@ import FloatingWhatsApp, {
   BROKER_PHONE_DISPLAY,
   BROKER_CRECI,
 } from '@/components/FloatingWhatsApp'
-import { MessageCircle, ArrowLeft } from 'lucide-react'
+import { ClientOnboardingModal } from '@/components/ClientOnboardingModal'
+import { MessageCircle, ArrowLeft, Compass } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Property } from '@/types'
 
@@ -43,6 +44,7 @@ export default function PublicSchedule() {
   const [properties, setProperties] = useState<Property[]>([])
   const [loading, setLoading] = useState(true)
   const [submitted, setSubmitted] = useState(false)
+  const [guideOpen, setGuideOpen] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -109,16 +111,26 @@ export default function PublicSchedule() {
   return (
     <div className="min-h-screen bg-[#F8F9FA] py-8 sm:py-12 px-4 animate-fade-in max-w-4xl mx-auto space-y-8">
       {/* Header back to site */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <Link
           to="/"
           className="text-xs font-bold text-[#1A3636] hover:text-[#D4AF37] flex items-center gap-1.5 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Voltar para o Site Oficial
         </Link>
-        <span className="text-xs font-semibold text-gray-500">
-          CRECI {BROKER_CRECI} • Foxter Cia. Imobiliária
-        </span>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setGuideOpen(true)}
+            className="text-xs text-[#1A3636] hover:text-[#D4AF37] gap-1 px-2"
+          >
+            <Compass className="w-3.5 h-3.5 text-[#D4AF37]" /> Como Funciona a Visita
+          </Button>
+          <span className="text-xs font-semibold text-gray-500 hidden sm:inline">
+            CRECI {BROKER_CRECI} • Foxter Cia. Imobiliária
+          </span>
+        </div>
       </div>
 
       {/* Brand Hero */}
@@ -344,6 +356,7 @@ export default function PublicSchedule() {
         </div>
       )}
 
+      <ClientOnboardingModal forceOpen={guideOpen} onCloseManual={() => setGuideOpen(false)} />
       <FloatingWhatsApp />
     </div>
   )

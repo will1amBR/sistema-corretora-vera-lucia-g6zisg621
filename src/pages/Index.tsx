@@ -23,12 +23,15 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/use-auth'
 import { getProperties, getPropertyImageUrl } from '@/services/properties'
 import { getClients, updateClientStatus } from '@/services/clients'
 import { getProposals } from '@/services/proposals'
 import { syncGoogleCalendar } from '@/services/calendar'
+import { BrokerOnboardingModal } from '@/components/BrokerOnboardingModal'
+import { Compass } from 'lucide-react'
 import type { Property, Client, Proposal, CalendarEvent, ClientStatus } from '@/types'
 
 const STAGES: { key: ClientStatus; label: string; color: string }[] = [
@@ -49,6 +52,7 @@ export default function Index() {
   const [isGoogleConnected, setIsGoogleConnected] = useState(false)
   const [isSyncingCalendar, setIsSyncingCalendar] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [showTour, setShowTour] = useState(false)
 
   const loadAllData = async () => {
     try {
@@ -172,22 +176,37 @@ export default function Index() {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setShowTour(true)}
+            className="border-[#D4AF37]/50 text-[#1A3636] hover:bg-amber-50/50 text-xs font-semibold gap-1.5"
+          >
+            <Compass className="w-4 h-4 text-[#D4AF37]" />
+            Tour do Sistema
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
             onClick={loadAllData}
             disabled={loading}
-            className="border-gray-200 text-[#1A3636] hover:bg-gray-50"
+            className="border-gray-200 text-[#1A3636] hover:bg-gray-50 text-xs"
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
             Atualizar
           </Button>
 
           <Link to="/crm">
-            <Button size="sm" className="bg-[#1A3636] text-white hover:bg-[#254d4d] gap-2">
+            <Button
+              size="sm"
+              className="bg-[#1A3636] text-white hover:bg-[#254d4d] gap-2 text-xs font-semibold shadow-xs"
+            >
               <Plus className="w-4 h-4 text-[#D4AF37]" />
               Novo Lead
             </Button>
           </Link>
         </div>
       </div>
+
+      <BrokerOnboardingModal forceOpen={showTour} onCloseManual={() => setShowTour(false)} />
 
       {/* KPI Ribbon */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -512,7 +531,12 @@ export default function Index() {
                   Próximas Visitas Agendadas
                 </p>
 
-                {calendarEvents.length === 0 ? (
+                {loading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-16 w-full rounded-lg bg-gray-100" />
+                    <Skeleton className="h-16 w-full rounded-lg bg-gray-100" />
+                  </div>
+                ) : calendarEvents.length === 0 ? (
                   <div className="text-center py-6 text-xs text-gray-400 bg-gray-50/50 rounded-lg">
                     Nenhuma visita agendada no momento.
                   </div>
@@ -581,27 +605,40 @@ export default function Index() {
               </div>
             </CardHeader>
             <CardContent className="p-5 pt-0 space-y-3">
-              {properties.slice(0, 3).map((property) => (
-                <div
-                  key={property.id}
-                  className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
-                >
-                  <img
-                    src={getPropertyImageUrl(property)}
-                    alt={property.title}
-                    className="w-14 h-14 rounded-md object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h5 className="font-bold text-xs text-[#1A3636] truncate">{property.title}</h5>
-                    <p className="text-[11px] text-gray-500 truncate">
-                      {property.neighborhood} • {property.city}
-                    </p>
-                    <p className="text-xs font-semibold text-[#D4AF37] mt-0.5">
-                      R$ {property.price?.toLocaleString('pt-BR')}
-                    </p>
-                  </div>
+              {loading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-14 w-full rounded-lg bg-gray-100" />
+                  <Skeleton className="h-14 w-full rounded-lg bg-gray-100" />
+                  <Skeleton className="h-14 w-full rounded-lg bg-gray-100" />
                 </div>
-              ))}
+              ) : (
+                properties.slice(0, 3).map((property) => (
+                  <div
+                    key={property.id}
+                    className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <img
+                      src={getPropertyImageUrl(property)}
+                      alt={property.title}
+                      loading="lazy"
+                      width="56"
+                      height="56"
+                      className="w-14 h-14 rounded-md object-cover"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h5 className="font-bold text-xs text-[#1A3636] truncate">
+                        {property.title}
+                      </h5>
+                      <p className="text-[11px] text-gray-500 truncate">
+                        {property.neighborhood} • {property.city}
+                      </p>
+                      <p className="text-xs font-semibold text-[#D4AF37] mt-0.5">
+                        R$ {property.price?.toLocaleString('pt-BR')}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </div>

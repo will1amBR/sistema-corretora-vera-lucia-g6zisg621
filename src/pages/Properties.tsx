@@ -46,6 +46,7 @@ import {
 } from '@/services/properties'
 import PropertyDetailModal from '@/components/PropertyDetailModal'
 import { getWhatsAppUrl } from '@/components/FloatingWhatsApp'
+import { Skeleton } from '@/components/ui/skeleton'
 import { MessageCircle } from 'lucide-react'
 import type { Property } from '@/types'
 
@@ -256,9 +257,24 @@ export default function Properties() {
       {/* Properties Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          <div className="col-span-full py-12 text-center text-gray-400">
-            Carregando catálogo de imóveis...
-          </div>
+          <>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="bg-white p-4 rounded-xl border border-gray-100 shadow-xs space-y-3"
+              >
+                <Skeleton className="h-48 w-full rounded-lg bg-gray-200" />
+                <Skeleton className="h-5 w-3/4 bg-gray-200" />
+                <Skeleton className="h-4 w-1/2 bg-gray-100" />
+                <div className="grid grid-cols-4 gap-2 pt-2">
+                  <Skeleton className="h-8 rounded bg-gray-100" />
+                  <Skeleton className="h-8 rounded bg-gray-100" />
+                  <Skeleton className="h-8 rounded bg-gray-100" />
+                  <Skeleton className="h-8 rounded bg-gray-100" />
+                </div>
+              </div>
+            ))}
+          </>
         ) : filteredProperties.length === 0 ? (
           <div className="col-span-full py-12 text-center text-gray-400 bg-white rounded-xl card-elevated">
             Nenhum imóvel encontrado.
@@ -277,6 +293,9 @@ export default function Properties() {
                     <img
                       src={imageUrl}
                       alt={prop.title}
+                      loading="lazy"
+                      width="500"
+                      height="300"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute top-3 left-3 flex flex-wrap gap-1">

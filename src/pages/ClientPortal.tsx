@@ -30,6 +30,8 @@ import {
   createDocument,
   getDocumentDownloadUrl,
 } from '@/services/documents'
+import { ClientOnboardingModal } from '@/components/ClientOnboardingModal'
+import { HelpCircle, Sparkles, Compass } from 'lucide-react'
 import type { Client, Proposal, ClientDocument } from '@/types'
 
 const REQUIRED_DOC_TYPES = [
@@ -55,6 +57,7 @@ export default function ClientPortal() {
   const [loading, setLoading] = useState(true)
   const [tokenInput, setTokenInput] = useState('')
   const [uploadingDocType, setUploadingDocType] = useState<string | null>(null)
+  const [clientTourOpen, setClientTourOpen] = useState(false)
 
   // Direct login from URL query param
   useEffect(() => {
@@ -226,7 +229,15 @@ export default function ClientPortal() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setClientTourOpen(true)}
+            className="border-[#D4AF37]/60 text-[#D4AF37] hover:bg-white/10 text-xs font-semibold gap-1.5"
+          >
+            <Compass className="w-3.5 h-3.5" /> Como Funciona o Portal
+          </Button>
           <Badge className="bg-[#D4AF37] text-[#1A3636] font-bold text-xs py-1 px-3">
             Atendimento Exclusivo Vera Lúcia
           </Badge>
@@ -339,6 +350,12 @@ export default function ClientPortal() {
           </Card>
         </div>
       )}
+
+      {/* Client Onboarding Walkthrough */}
+      <ClientOnboardingModal
+        forceOpen={clientTourOpen}
+        onCloseManual={() => setClientTourOpen(false)}
+      />
 
       {/* Document Vault (Drag & Drop / Upload Cards) */}
       <Card className="card-elevated">

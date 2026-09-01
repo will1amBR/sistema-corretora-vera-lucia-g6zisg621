@@ -51,6 +51,9 @@ import FloatingWhatsApp, {
   BROKER_AGENCY,
   BROKER_CITY,
 } from '@/components/FloatingWhatsApp'
+import { ClientOnboardingModal } from '@/components/ClientOnboardingModal'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Compass, HelpCircle } from 'lucide-react'
 import type { Property } from '@/types'
 
 const SERVICES_LIST = [
@@ -116,6 +119,7 @@ export default function LandingPage() {
   const [selectedModality, setSelectedModality] = useState('all')
   const [selectedPropertyForModal, setSelectedPropertyForModal] = useState<Property | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [clientGuideOpen, setClientGuideOpen] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -205,9 +209,23 @@ export default function LandingPage() {
             <a href="#contato" className="hover:text-[#D4AF37] transition-colors">
               Contato
             </a>
+            <button
+              onClick={() => setClientGuideOpen(true)}
+              className="text-xs text-[#D4AF37] hover:text-white flex items-center gap-1 font-medium transition-colors"
+            >
+              <Compass className="w-3.5 h-3.5" /> Como Comprar
+            </button>
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setClientGuideOpen(true)}
+              className="md:hidden text-[#D4AF37] hover:bg-white/10 text-xs px-2"
+            >
+              <Compass className="w-4 h-4 mr-1" /> Guia
+            </Button>
             <Link to="/agendar">
               <Button
                 size="sm"
@@ -480,9 +498,24 @@ export default function LandingPage() {
         {/* Properties Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
-            <div className="col-span-full py-20 text-center text-gray-400">
-              Carregando imóveis de Porto Alegre...
-            </div>
+            <>
+              {[1, 2, 3, 4, 5, 6].map((sk) => (
+                <div
+                  key={sk}
+                  className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3 shadow-xs"
+                >
+                  <Skeleton className="h-56 w-full rounded-xl bg-gray-200" />
+                  <Skeleton className="h-5 w-3/4 bg-gray-200" />
+                  <Skeleton className="h-4 w-1/2 bg-gray-100" />
+                  <div className="grid grid-cols-4 gap-2 pt-2">
+                    <Skeleton className="h-10 rounded-lg bg-gray-100" />
+                    <Skeleton className="h-10 rounded-lg bg-gray-100" />
+                    <Skeleton className="h-10 rounded-lg bg-gray-100" />
+                    <Skeleton className="h-10 rounded-lg bg-gray-100" />
+                  </div>
+                </div>
+              ))}
+            </>
           ) : filteredProperties.length === 0 ? (
             <div className="col-span-full py-16 text-center bg-white rounded-2xl border border-gray-200 p-8 space-y-3">
               <Building2 className="w-12 h-12 text-gray-300 mx-auto" />
@@ -525,6 +558,9 @@ export default function LandingPage() {
                       <img
                         src={imageUrl}
                         alt={prop.title}
+                        loading="lazy"
+                        width="640"
+                        height="400"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
@@ -1015,6 +1051,12 @@ export default function LandingPage() {
         property={selectedPropertyForModal}
         isOpen={!!selectedPropertyForModal}
         onClose={() => setSelectedPropertyForModal(null)}
+      />
+
+      {/* Interactive Buyer Guide Modal */}
+      <ClientOnboardingModal
+        forceOpen={clientGuideOpen}
+        onCloseManual={() => setClientGuideOpen(false)}
       />
 
       {/* Floating WhatsApp on All Views */}

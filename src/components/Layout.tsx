@@ -16,16 +16,20 @@ import {
   UserCheck,
   FileCheck2,
   Lock,
+  Compass,
+  HelpCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { BrokerOnboardingModal } from '@/components/BrokerOnboardingModal'
 
 export default function Layout() {
   const { user, isAdmin, clientPortal, logout, loginAsAdmin } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [tourOpen, setTourOpen] = useState(false)
 
   // Check if currently on a client-only route or public landing
   const isClientRoute = location.pathname.startsWith('/portal')
@@ -141,6 +145,22 @@ export default function Layout() {
               </span>
             </NavLink>
           </nav>
+
+          {/* Tour Button for Vera */}
+          <div className="px-4 py-3 border-t border-white/10">
+            <button
+              onClick={() => setTourOpen(true)}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold bg-[#D4AF37]/15 text-[#D4AF37] hover:bg-[#D4AF37]/25 border border-[#D4AF37]/40 transition-all group"
+            >
+              <div className="flex items-center gap-2">
+                <Compass className="w-4 h-4 group-hover:rotate-45 transition-transform" />
+                <span>Tour do Sistema</span>
+              </div>
+              <span className="text-[10px] bg-[#D4AF37] text-[#1A3636] font-extrabold px-1.5 py-0.2 rounded">
+                Ajuda
+              </span>
+            </button>
+          </div>
 
           {/* User profile / Footer */}
           <div className="p-4 border-t border-white/10 bg-[#142A2A]">
@@ -261,6 +281,11 @@ export default function Layout() {
         <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
           <Outlet />
         </main>
+
+        {/* Global Onboarding Modal for Vera */}
+        {!isClientRoute && (
+          <BrokerOnboardingModal forceOpen={tourOpen} onCloseManual={() => setTourOpen(false)} />
+        )}
 
         {/* Mobile Bottom Navigation for Vera (quick access) */}
         {!isClientRoute && (

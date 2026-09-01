@@ -37,6 +37,7 @@ import { useToast } from '@/hooks/use-toast'
 import { getClients, scheduleClientVisit } from '@/services/clients'
 import { getProperties } from '@/services/properties'
 import { syncGoogleCalendar } from '@/services/calendar'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { Client, Property, CalendarEvent } from '@/types'
 
 export default function CalendarSchedule() {
@@ -46,6 +47,7 @@ export default function CalendarSchedule() {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [isGoogleConnected, setIsGoogleConnected] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
 
   // Schedule visit form
@@ -58,6 +60,7 @@ export default function CalendarSchedule() {
 
   const loadData = async () => {
     try {
+      setLoading(true)
       const [cData, pData] = await Promise.all([getClients(), getProperties()])
       setClients(cData)
       setProperties(pData)
@@ -84,6 +87,8 @@ export default function CalendarSchedule() {
       }
     } catch (err) {
       console.error(err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -246,7 +251,20 @@ export default function CalendarSchedule() {
           <CalendarIcon className="w-5 h-5 text-[#D4AF37]" /> Visitas Agendadas ({events.length})
         </h2>
 
-        {events.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="bg-white p-5 rounded-xl border border-gray-100 shadow-xs space-y-3"
+              >
+                <Skeleton className="h-5 w-40 bg-gray-200" />
+                <Skeleton className="h-4 w-52 bg-gray-100" />
+                <Skeleton className="h-16 w-full rounded bg-gray-50" />
+              </div>
+            ))}
+          </div>
+        ) : events.length === 0 ? (
           <Card className="card-elevated text-center py-12 text-gray-400">
             <CardContent>Nenhuma visita cadastrada na agenda.</CardContent>
           </Card>

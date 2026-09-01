@@ -39,6 +39,7 @@ import {
   updateObjection,
   deleteObjection,
 } from '@/services/objections'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { Objection } from '@/types'
 
 const CATEGORIES: { key: Objection['category']; label: string }[] = [
@@ -217,7 +218,18 @@ export default function ObjectionsBase() {
       {/* Objections List */}
       <div className="space-y-4">
         {loading ? (
-          <div className="py-12 text-center text-gray-400">Carregando base de objeções...</div>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-white p-5 rounded-xl border border-gray-100 shadow-xs space-y-3"
+              >
+                <Skeleton className="h-5 w-48 bg-gray-200" />
+                <Skeleton className="h-4 w-72 bg-gray-100" />
+                <Skeleton className="h-24 w-full rounded-lg bg-gray-50" />
+              </div>
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
           <div className="py-12 text-center text-gray-400 bg-white rounded-xl card-elevated">
             Nenhuma objeção cadastrada nesta categoria.

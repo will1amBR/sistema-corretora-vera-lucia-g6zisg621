@@ -35,6 +35,7 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { getProposals, updateProposalStatus, deleteProposal } from '@/services/proposals'
 import { getDocuments, updateDocumentStatus, getDocumentDownloadUrl } from '@/services/documents'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { Proposal, ClientDocument, ProposalStatus, DocumentStatus } from '@/types'
 
 const PROPOSAL_STATUS_LABELS: Record<ProposalStatus, { label: string; color: string }> = {
@@ -140,7 +141,19 @@ export default function ProposalsManager() {
         <h2 className="text-lg font-bold text-[#1A3636]">Propostas Ativas ({proposals.length})</h2>
 
         {loading ? (
-          <div className="py-12 text-center text-gray-400">Carregando propostas...</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="bg-white p-5 rounded-xl border border-gray-100 shadow-xs space-y-3"
+              >
+                <Skeleton className="h-5 w-40 bg-gray-200" />
+                <Skeleton className="h-4 w-32 bg-gray-100" />
+                <Skeleton className="h-20 w-full rounded-lg bg-gray-50" />
+                <Skeleton className="h-10 w-full rounded-lg bg-gray-50" />
+              </div>
+            ))}
+          </div>
         ) : proposals.length === 0 ? (
           <Card className="card-elevated text-center py-12 text-gray-400">
             <CardContent>

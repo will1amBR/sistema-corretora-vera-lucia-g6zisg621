@@ -42,6 +42,7 @@ import { useToast } from '@/hooks/use-toast'
 import { getClients, createClient, updateClient, deleteClient } from '@/services/clients'
 import { getProperties } from '@/services/properties'
 import { createProposal } from '@/services/proposals'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { Client, Property, ClientStatus, PurchaseModality, FinancialBreakdown } from '@/types'
 
 const STATUS_OPTIONS: { value: ClientStatus; label: string }[] = [
@@ -332,9 +333,25 @@ export default function CRMLeads() {
       {/* Clients List Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          <div className="col-span-full py-12 text-center text-gray-400">
-            Carregando base de clientes...
-          </div>
+          <>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="bg-white p-5 rounded-xl border border-gray-100 shadow-xs space-y-4"
+              >
+                <div className="flex justify-between">
+                  <Skeleton className="h-5 w-32 bg-gray-200" />
+                  <Skeleton className="h-4 w-16 bg-gray-100" />
+                </div>
+                <Skeleton className="h-12 w-full rounded-lg bg-gray-50" />
+                <Skeleton className="h-16 w-full rounded-lg bg-gray-50" />
+                <div className="flex justify-between pt-2 border-t">
+                  <Skeleton className="h-8 w-16 bg-gray-100" />
+                  <Skeleton className="h-8 w-24 bg-gray-200" />
+                </div>
+              </div>
+            ))}
+          </>
         ) : filteredClients.length === 0 ? (
           <div className="col-span-full py-12 text-center text-gray-400 bg-white rounded-xl card-elevated">
             Nenhum cliente encontrado com os filtros selecionados.
