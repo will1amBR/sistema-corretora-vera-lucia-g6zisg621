@@ -44,6 +44,9 @@ import {
   deleteProperty,
   getPropertyImageUrl,
 } from '@/services/properties'
+import PropertyDetailModal from '@/components/PropertyDetailModal'
+import { getWhatsAppUrl } from '@/components/FloatingWhatsApp'
+import { MessageCircle } from 'lucide-react'
 import type { Property } from '@/types'
 
 export default function Properties() {
@@ -52,6 +55,7 @@ export default function Properties() {
   const [search, setSearch] = useState('')
   const [selectedModality, setSelectedModality] = useState<string>('all')
   const [loading, setLoading] = useState(true)
+  const [viewingDetailProp, setViewingDetailProp] = useState<Property | null>(null)
 
   // Modal
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -61,7 +65,7 @@ export default function Properties() {
     description: '',
     address: '',
     neighborhood: '',
-    city: 'São Paulo - SP',
+    city: 'Porto Alegre - RS',
     price: 0,
     bedrooms: 3,
     bathrooms: 3,
@@ -97,7 +101,7 @@ export default function Properties() {
       description: '',
       address: '',
       neighborhood: '',
-      city: 'São Paulo - SP',
+      city: 'Porto Alegre - RS',
       price: 1500000,
       bedrooms: 3,
       bathrooms: 3,
@@ -119,7 +123,7 @@ export default function Properties() {
       description: prop.description || '',
       address: prop.address || '',
       neighborhood: prop.neighborhood || '',
-      city: prop.city || 'São Paulo - SP',
+      city: prop.city || 'Porto Alegre - RS',
       price: prop.price || 0,
       bedrooms: prop.bedrooms || 0,
       bathrooms: prop.bathrooms || 0,
@@ -360,24 +364,47 @@ export default function Properties() {
                 </div>
 
                 {/* Footer Controls */}
-                <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-[11px] text-gray-400">ID: {prop.id.substring(0, 8)}</span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleOpenEdit(prop)}
-                      className="text-xs text-[#1A3636] hover:bg-gray-200"
+                <div className="p-4 bg-gray-50 border-t border-gray-100 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-gray-400">ID: {prop.id.substring(0, 8)}</span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleOpenEdit(prop)}
+                        className="text-xs text-[#1A3636] hover:bg-gray-200"
+                      >
+                        <Edit className="w-3.5 h-3.5 mr-1" /> Editar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(prop.id)}
+                        className="text-xs text-gray-400 hover:text-red-600"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-1 border-t border-gray-200/60">
+                    <a
+                      href={getWhatsAppUrl(
+                        `Olá Vera Lúcia! Tenho interesse no imóvel "${prop.title}" (${prop.neighborhood}, R$ ${prop.price?.toLocaleString('pt-BR')}). Poderia me passar mais detalhes?`,
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 shadow-xs"
                     >
-                      <Edit className="w-3.5 h-3.5 mr-1" /> Editar
-                    </Button>
+                      <MessageCircle className="w-3.5 h-3.5 fill-white" /> Falar no WhatsApp
+                    </a>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(prop.id)}
-                      className="text-xs text-gray-400 hover:text-red-600"
+                      onClick={() => setViewingDetailProp(prop)}
+                      className="text-xs text-[#1A3636]"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      Ver Detalhes
                     </Button>
                   </div>
                 </div>
@@ -386,6 +413,12 @@ export default function Properties() {
           })
         )}
       </div>
+
+      <PropertyDetailModal
+        property={viewingDetailProp}
+        isOpen={!!viewingDetailProp}
+        onClose={() => setViewingDetailProp(null)}
+      />
 
       {/* Modal Form: Create / Edit Property */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

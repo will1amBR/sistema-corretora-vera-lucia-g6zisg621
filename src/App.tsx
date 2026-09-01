@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuthProvider } from '@/hooks/use-auth'
 import Layout from './components/Layout'
 
+import LandingPage from './pages/LandingPage'
 import Index from './pages/Index'
 import CRMLeads from './pages/CRMLeads'
 import Properties from './pages/Properties'
@@ -24,8 +25,13 @@ const App = () => (
         <Toaster />
         <Sonner />
         <Routes>
+          {/* Public Landing Page */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/agendar" element={<PublicSchedule />} />
+
+          {/* Backoffice Management & CRM Layout */}
           <Route element={<Layout />}>
-            <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Index />} />
             <Route path="/crm" element={<CRMLeads />} />
             <Route path="/imoveis" element={<Properties />} />
             <Route path="/agenda" element={<CalendarSchedule />} />
@@ -35,8 +41,6 @@ const App = () => (
             <Route path="/portal" element={<ClientPortal />} />
           </Route>
 
-          {/* Standalone Public Schedule page */}
-          <Route path="/agendar" element={<PublicSchedule />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </TooltipProvider>

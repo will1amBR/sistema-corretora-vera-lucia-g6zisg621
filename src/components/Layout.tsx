@@ -32,7 +32,7 @@ export default function Layout() {
   const isPublicSchedule = location.pathname.startsWith('/agendar')
 
   const navItems = [
-    { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'CRM & Funil', path: '/crm', icon: Users },
     { label: 'Imóveis', path: '/imoveis', icon: Building2 },
     { label: 'Agenda & Visitas', path: '/agenda', icon: CalendarDays },
@@ -105,13 +105,25 @@ export default function Layout() {
             </div>
 
             <NavLink
-              to="/agendar"
+              to="/"
               target="_blank"
               className="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-all"
             >
               <div className="flex items-center gap-3">
                 <ExternalLink className="w-4 h-4 text-[#D4AF37]" />
-                <span>Site Agendamento Público</span>
+                <span>Landing Page Pública</span>
+              </div>
+              <span className="text-[11px] text-[#D4AF37]">Site ↗</span>
+            </NavLink>
+
+            <NavLink
+              to="/agendar"
+              target="_blank"
+              className="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <CalendarDays className="w-4 h-4 text-[#D4AF37]" />
+                <span>Agendamento Público</span>
               </div>
               <span className="text-[11px] text-[#D4AF37]">Link ↗</span>
             </NavLink>
@@ -219,13 +231,20 @@ export default function Layout() {
                 </NavLink>
               )
             })}
-            <div className="pt-4 border-t border-white/10 flex justify-between items-center">
+            <div className="pt-4 border-t border-white/10 flex flex-col gap-2">
               <NavLink
-                to="/agendar"
+                to="/"
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-xs text-[#D4AF37] flex items-center gap-1 font-medium"
               >
-                <ExternalLink className="w-3.5 h-3.5" /> Site Agendamento
+                <ExternalLink className="w-3.5 h-3.5" /> Landing Page Pública
+              </NavLink>
+              <NavLink
+                to="/agendar"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-xs text-white/80 flex items-center gap-1"
+              >
+                <CalendarDays className="w-3.5 h-3.5 text-[#D4AF37]" /> Agendamento Público
               </NavLink>
               <NavLink
                 to="/portal"
@@ -247,7 +266,7 @@ export default function Layout() {
         {!isClientRoute && (
           <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#1A3636] text-white border-t border-white/10 px-3 py-2 flex justify-around items-center z-40 shadow-lg">
             <NavLink
-              to="/"
+              to="/dashboard"
               className={({ isActive }) =>
                 `flex flex-col items-center gap-1 text-[11px] ${
                   isActive ? 'text-[#D4AF37] font-bold' : 'text-white/70'

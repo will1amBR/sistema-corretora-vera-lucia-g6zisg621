@@ -326,17 +326,16 @@ export default function ClientPortal() {
                 )}
               </div>
             </div>
-
             {/* Direct Broker Contact */}
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 text-xs space-y-2">
               <div className="flex items-center gap-2 font-bold text-[#1A3636]">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" /> Corretora Responsável
               </div>
-              <p className="text-[11px] text-gray-600">Vera Lúcia Koren • CRECI Especialista</p>
+              <p className="text-[11px] text-gray-600">Vera Lúcia Koren • CRECI 38415 (Foxter)</p>
               <div className="flex items-center gap-2 pt-1 text-[11px] text-gray-600">
-                <Phone className="w-3.5 h-3.5 text-[#D4AF37]" /> (11) 98765-4321
+                <Phone className="w-3.5 h-3.5 text-[#D4AF37]" /> (51) 99132-7636
               </div>
-            </div>
+            </div>{' '}
           </Card>
         </div>
       )}

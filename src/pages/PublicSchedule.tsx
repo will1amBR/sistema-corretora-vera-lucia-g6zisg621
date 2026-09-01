@@ -29,6 +29,13 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { getProperties, getPropertyImageUrl } from '@/services/properties'
 import { createClient } from '@/services/clients'
+import FloatingWhatsApp, {
+  getWhatsAppUrl,
+  BROKER_PHONE_DISPLAY,
+  BROKER_CRECI,
+} from '@/components/FloatingWhatsApp'
+import { MessageCircle, ArrowLeft } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import type { Property } from '@/types'
 
 export default function PublicSchedule() {
@@ -101,16 +108,30 @@ export default function PublicSchedule() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] py-8 sm:py-12 px-4 animate-fade-in max-w-4xl mx-auto space-y-8">
+      {/* Header back to site */}
+      <div className="flex items-center justify-between">
+        <Link
+          to="/"
+          className="text-xs font-bold text-[#1A3636] hover:text-[#D4AF37] flex items-center gap-1.5 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" /> Voltar para o Site Oficial
+        </Link>
+        <span className="text-xs font-semibold text-gray-500">
+          CRECI {BROKER_CRECI} • Foxter Cia. Imobiliária
+        </span>
+      </div>
+
       {/* Brand Hero */}
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#1A3636] text-[#D4AF37] rounded-full text-xs font-semibold mb-2 shadow-sm">
-          <Sparkles className="w-3.5 h-3.5" /> Corretora de Imóveis Exclusiva
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-[#1A3636] text-[#D4AF37] rounded-full text-xs font-semibold mb-2 shadow-sm">
+          <Sparkles className="w-3.5 h-3.5" /> Corretora de Imóveis — CRECI 38415
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1A3636] tracking-tight">
           VERA LÚCIA KOREN
         </h1>
         <p className="text-sm sm:text-base text-gray-600 max-w-xl mx-auto">
-          Agende sua visita exclusiva aos imóveis de alto padrão mais desejados de São Paulo.
+          Agende sua visita exclusiva aos imóveis de alto padrão mais desejados de Porto Alegre -
+          RS.
         </p>
       </div>
 
@@ -200,7 +221,7 @@ export default function PublicSchedule() {
                       id="c_phone"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="(11) 99999-9999"
+                      placeholder="(51) 99999-9999"
                       required
                     />
                   </div>
@@ -302,12 +323,28 @@ export default function PublicSchedule() {
               </div>
               <p className="text-[11px] text-white/80 leading-relaxed">
                 A corretora Vera Lúcia acompanha pessoalmente cada visita, garantindo segurança
-                jurídica e negociações ágeis.
+                jurídica, análise financeira e negociações ágeis em Porto Alegre.
               </p>
+              <div className="pt-2">
+                <a
+                  href={getWhatsAppUrl(
+                    selectedProperty
+                      ? `Olá Vera Lúcia! Gostaria de falar sobre a visita no imóvel "${selectedProperty.title}".`
+                      : 'Olá Vera Lúcia! Gostaria de agendar uma visita em Porto Alegre.',
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 fill-white" /> Falar com a Vera no WhatsApp
+                </a>
+              </div>
             </Card>
           </div>
         </div>
       )}
+
+      <FloatingWhatsApp />
     </div>
   )
 }
