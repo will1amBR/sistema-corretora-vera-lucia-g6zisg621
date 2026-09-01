@@ -1,0 +1,548 @@
+{
+  "generatedAt": "2026-09-01T17:18:11.895Z",
+  "collections": [
+    {
+      "name": "users",
+      "type": "auth",
+      "apiRules": {
+        "list": "id = @request.auth.id",
+        "view": "id = @request.auth.id",
+        "create": "",
+        "update": "id = @request.auth.id",
+        "delete": "id = @request.auth.id"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "avatar",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "role",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["admin", "client"]
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)",
+        "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
+      ]
+    },
+    {
+      "name": "properties",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "address",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "neighborhood",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "city",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "price",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "bedrooms",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "bathrooms",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "suites",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "parking_spots",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "area_sqm",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "modality",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["sale", "rent", "financing", "permuta"]
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["available", "reserved", "sold"]
+        },
+        {
+          "name": "features",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "images",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "featured",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_properties_status ON properties (status)",
+        "CREATE INDEX idx_properties_modality ON properties (modality)"
+      ]
+    },
+    {
+      "name": "clients",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "",
+        "update": "",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "phone",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["lead", "contact", "visit", "proposal", "closing", "lost"]
+        },
+        {
+          "name": "purchase_modality",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["a_vista", "financiamento", "consorcio", "permuta", "fgts", "misto"]
+        },
+        {
+          "name": "financial_breakdown",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "objectives",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "objections_notes",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "interested_property_ids",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "google_event_id",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "visit_scheduled_at",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "visit_property_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "properties"
+        },
+        {
+          "name": "visit_notes",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "portal_token",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_clients_status ON clients (status)",
+        "CREATE INDEX idx_clients_email ON clients (email)",
+        "CREATE INDEX idx_clients_portal_token ON clients (portal_token)"
+      ]
+    },
+    {
+      "name": "proposals",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "",
+        "update": "",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "client_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "clients"
+        },
+        {
+          "name": "property_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "properties"
+        },
+        {
+          "name": "value",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "down_payment",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "financing_value",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "bank_partner",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "payment_terms",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "conditions",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": [
+            "drafted",
+            "sent",
+            "docs_pending",
+            "under_review",
+            "accepted",
+            "rejected"
+          ]
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_proposals_client ON proposals (client_id)",
+        "CREATE INDEX idx_proposals_property ON proposals (property_id)",
+        "CREATE INDEX idx_proposals_status ON proposals (status)"
+      ]
+    },
+    {
+      "name": "documents",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "",
+        "update": "",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "client_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "clients"
+        },
+        {
+          "name": "proposal_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "proposals"
+        },
+        {
+          "name": "type",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "file",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["pending", "verified", "rejected"]
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_documents_client ON documents (client_id)",
+        "CREATE INDEX idx_documents_proposal ON documents (proposal_id)"
+      ]
+    },
+    {
+      "name": "objections",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "category",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": [
+            "price",
+            "location",
+            "financing",
+            "timing",
+            "renovation",
+            "market",
+            "other"
+          ]
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "ai_response",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "key_tactics",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_objections_cat ON objections (category)"]
+    }
+  ]
+}
