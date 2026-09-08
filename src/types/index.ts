@@ -10,6 +10,16 @@ export interface User {
   updated: string
 }
 
+export type PropertyType =
+  | 'apartamento'
+  | 'casa'
+  | 'cobertura'
+  | 'terreno'
+  | 'sala_comercial'
+  | 'outro'
+export type PropertyModality = 'sale' | 'rent' | 'financing' | 'permuta'
+export type PropertyStatus = 'available' | 'reserved' | 'sold'
+
 export interface Property {
   id: string
   title: string
@@ -23,8 +33,10 @@ export interface Property {
   suites?: number
   parking_spots?: number
   area_sqm?: number
-  modality: 'sale' | 'rent' | 'financing' | 'permuta'
-  status: 'available' | 'reserved' | 'sold'
+  property_type?: PropertyType
+  cover_image?: string
+  modality: PropertyModality
+  status: PropertyStatus
   features?: string[]
   images?: string[]
   featured?: boolean

@@ -194,6 +194,17 @@ export default function Index() {
             Atualizar
           </Button>
 
+          <Link to="/admin/imoveis">
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-[#D4AF37] text-[#1A3636] hover:bg-amber-50 gap-2 text-xs font-semibold shadow-xs"
+            >
+              <Plus className="w-4 h-4 text-[#D4AF37]" />
+              Cadastrar Imóvel
+            </Button>
+          </Link>
+
           <Link to="/crm">
             <Button
               size="sm"
@@ -227,20 +238,24 @@ export default function Index() {
           </CardContent>
         </Card>
 
-        <Card className="card-elevated border-l-4 border-l-[#D4AF37] hover:shadow-md transition-shadow">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Imóveis Disponíveis
-              </p>
-              <h3 className="text-2xl font-bold text-[#1A3636] mt-1">{availablePropsCount}</h3>
-              <p className="text-xs text-gray-500 mt-1">Alto padrão e exclusivos</p>
-            </div>
-            <div className="w-12 h-12 rounded-full bg-[#D4AF37]/15 flex items-center justify-center text-[#1A3636]">
-              <Building2 className="w-6 h-6 text-[#1A3636]" />
-            </div>
-          </CardContent>
-        </Card>
+        <Link to="/admin/imoveis" className="block group">
+          <Card className="card-elevated border-l-4 border-l-[#D4AF37] hover:shadow-md transition-all group-hover:border-[#1A3636] cursor-pointer">
+            <CardContent className="p-5 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Imóveis Disponíveis
+                </p>
+                <h3 className="text-2xl font-bold text-[#1A3636] mt-1">{availablePropsCount}</h3>
+                <p className="text-xs text-[#D4AF37] font-semibold mt-1 group-hover:underline flex items-center gap-1">
+                  Gerenciar carteira & fotos →
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-full bg-[#D4AF37]/15 group-hover:bg-[#D4AF37]/30 transition-colors flex items-center justify-center text-[#1A3636]">
+                <Building2 className="w-6 h-6 text-[#1A3636]" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card className="card-elevated border-l-4 border-l-emerald-600 hover:shadow-md transition-shadow">
           <CardContent className="p-5 flex items-center justify-between">

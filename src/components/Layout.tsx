@@ -38,7 +38,8 @@ export default function Layout() {
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'CRM & Funil', path: '/crm', icon: Users },
-    { label: 'Imóveis', path: '/imoveis', icon: Building2 },
+    { label: 'Catálogo de Imóveis', path: '/imoveis', icon: Building2 },
+    { label: 'Gestão de Imóveis', path: '/admin/imoveis', icon: Building2, badge: 'Admin' },
     { label: 'Agenda & Visitas', path: '/agenda', icon: CalendarDays },
     { label: 'Vera AI Assistente', path: '/assistente-ia', icon: Bot, badge: 'IA' },
     { label: 'Base de Objeções', path: '/objecoes', icon: ShieldAlert },
@@ -313,7 +314,7 @@ export default function Layout() {
               <span>Funil</span>
             </NavLink>
             <NavLink
-              to="/imoveis"
+              to="/admin/imoveis"
               className={({ isActive }) =>
                 `flex flex-col items-center gap-1 text-[11px] ${
                   isActive ? 'text-[#D4AF37] font-bold' : 'text-white/70'
@@ -321,7 +322,7 @@ export default function Layout() {
               }
             >
               <Building2 className="w-5 h-5" />
-              <span>Imóveis</span>
+              <span>Admin Imóveis</span>
             </NavLink>
             <NavLink
               to="/agenda"

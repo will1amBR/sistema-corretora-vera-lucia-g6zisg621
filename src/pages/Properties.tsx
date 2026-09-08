@@ -15,12 +15,14 @@ import {
   Trash2,
   Image as ImageIcon,
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { SlidersHorizontal } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -217,13 +219,24 @@ export default function Properties() {
           </p>
         </div>
 
-        <Button
-          onClick={handleOpenCreate}
-          className="bg-[#1A3636] text-white hover:bg-[#254d4d] gap-2"
-        >
-          <Plus className="w-4 h-4 text-[#D4AF37]" />
-          Cadastrar Novo Imóvel
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link to="/admin/imoveis">
+            <Button
+              variant="outline"
+              className="border-[#D4AF37] text-[#1A3636] hover:bg-amber-50 font-semibold gap-2"
+            >
+              <SlidersHorizontal className="w-4 h-4 text-[#D4AF37]" />
+              Painel Administrativo
+            </Button>
+          </Link>
+          <Button
+            onClick={handleOpenCreate}
+            className="bg-[#1A3636] text-white hover:bg-[#254d4d] gap-2"
+          >
+            <Plus className="w-4 h-4 text-[#D4AF37]" />
+            Cadastrar Novo Imóvel
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}

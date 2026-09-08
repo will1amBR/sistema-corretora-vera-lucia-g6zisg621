@@ -90,10 +90,16 @@ export async function deleteProperty(id: string) {
 }
 
 export function getPropertyImageUrl(property: Property, filename?: string): string {
+  // Check if explicit cover or specific filename
+  if (filename) {
+    return pb.files.getURL(property, filename)
+  }
+  if (property.cover_image && property.images && property.images.includes(property.cover_image)) {
+    return pb.files.getURL(property, property.cover_image)
+  }
   // Check if PB stored images exist
   if (property.images && property.images.length > 0) {
-    const file = filename || property.images[0]
-    return pb.files.getURL(property, file)
+    return pb.files.getURL(property, property.images[0])
   }
 
   // Lookup curated high quality images by title
@@ -114,7 +120,16 @@ export function getPropertyImageUrl(property: Property, filename?: string): stri
 
 export function getPropertyGallery(property: Property): string[] {
   if (property.images && property.images.length > 0) {
-    return property.images.map((img) => pb.files.getURL(property, img))
+    // If cover_image is set, place it first in the gallery
+    const ordered = [...property.images]
+    if (property.cover_image && ordered.includes(property.cover_image)) {
+      const idx = ordered.indexOf(property.cover_image)
+      if (idx > 0) {
+        ordered.splice(idx, 1)
+        ordered.unshift(property.cover_image)
+      }
+    }
+    return ordered.map((img) => pb.files.getURL(property, img))
   }
 
   if (property.title && PROPERTY_FALLBACK_IMAGES[property.title]) {
@@ -122,4 +137,8 @@ export function getPropertyGallery(property: Property): string[] {
   }
 
   return DEFAULT_IMAGES
+}
+
+export async function updatePropertyStatus(id: string, status: Property['status']) {
+  return await pb.collection('properties').update<Property>(id, { status })
 }

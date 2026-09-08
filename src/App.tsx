@@ -13,6 +13,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'))
 const Index = lazy(() => import('./pages/Index'))
 const CRMLeads = lazy(() => import('./pages/CRMLeads'))
 const Properties = lazy(() => import('./pages/Properties'))
+const AdminProperties = lazy(() => import('./pages/AdminProperties'))
 const CalendarSchedule = lazy(() => import('./pages/CalendarSchedule'))
 const AssistantAI = lazy(() => import('./pages/AssistantAI'))
 const ObjectionsBase = lazy(() => import('./pages/ObjectionsBase'))
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/dashboard" element={<Index />} />
               <Route path="/crm" element={<CRMLeads />} />
               <Route path="/imoveis" element={<Properties />} />
+              <Route path="/admin/imoveis" element={<AdminProperties />} />
               <Route path="/agenda" element={<CalendarSchedule />} />
               <Route path="/assistente-ia" element={<AssistantAI />} />
               <Route path="/objecoes" element={<ObjectionsBase />} />

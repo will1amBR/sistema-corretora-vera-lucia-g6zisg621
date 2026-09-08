@@ -92,11 +92,26 @@ export const VERA_TOUR_STEPS: TourStep[] = [
       'Cadastre e edite coberturas, apartamentos e casas nos bairros Moinhos de Vento, Bela Vista, Petrópolis, Três Figueiras e região. Suporta galeria de fotos, métricas completas e status de disponibilidade.',
     targetPath: '/imoveis',
     icon: Building2,
-    badgeText: 'Módulo Imóveis',
+    badgeText: 'Catálogo',
     tips: [
       'Filtro rápido por modalidade (Venda, Financiamento, Permuta)',
       'Abertura do modal detalhado com visualização rica de fotos',
       'Botão direto para compartilhar o imóvel no WhatsApp',
+    ],
+  },
+  {
+    id: 'admin_imoveis',
+    title: '3.1 Área Administrativa de Imóveis',
+    subtitle: 'Cadastro completo, upload de fotos e gestão de status',
+    description:
+      'Área dedicada para a Vera cadastrar novos imóveis com formulário completo, enviar fotos em lote, escolher a foto de capa e alterar status entre disponível, reservado ou vendido.',
+    targetPath: '/admin/imoveis',
+    icon: Building2,
+    badgeText: 'Admin Imóveis',
+    tips: [
+      'Upload múltiplo de imagens e definição da foto de capa',
+      'Edição rápida e ações em lote para alterar disponibilidade',
+      'Controle de valores, modalidades e comodidades de lazer',
     ],
   },
   {

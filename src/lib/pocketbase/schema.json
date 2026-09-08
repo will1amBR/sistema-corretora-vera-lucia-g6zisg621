@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-01T23:23:18.614Z",
+  "generatedAt": "2026-09-08T03:41:09.140Z",
   "collections": [
     {
       "name": "users",
@@ -57,9 +57,9 @@
       "apiRules": {
         "list": "",
         "view": "",
-        "create": "@request.auth.id != ''",
-        "update": "@request.auth.id != ''",
-        "delete": "@request.auth.id != ''"
+        "create": "",
+        "update": "",
+        "delete": ""
       },
       "fields": [
         {
@@ -173,6 +173,19 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "property_type",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["apartamento", "casa", "cobertura", "terreno", "sala_comercial", "outro"]
+        },
+        {
+          "name": "cover_image",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [
