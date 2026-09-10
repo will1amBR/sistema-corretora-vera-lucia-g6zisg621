@@ -84,6 +84,7 @@ export interface Client {
   visit_property_id?: string
   visit_notes?: string
   portal_token?: string
+  broker_message?: string
   notes?: string
   created: string
   updated: string
@@ -93,6 +94,16 @@ export interface Client {
   }
 }
 
+export type NegotiationStage =
+  | 'visita_realizada'
+  | 'proposta_enviada'
+  | 'proposta_em_analise'
+  | 'proposta_aprovada'
+  | 'documentacao'
+  | 'analise_credito'
+  | 'contrato_assinado'
+  | 'concluido'
+
 export type ProposalStatus =
   | 'drafted'
   | 'sent'
@@ -100,6 +111,20 @@ export type ProposalStatus =
   | 'under_review'
   | 'accepted'
   | 'rejected'
+
+export interface ProposalSimulationData {
+  amortizationType?: 'SAC' | 'PRICE'
+  termYears?: number
+  interestRateAnnual?: number
+  monthlyInstallment?: number
+  firstInstallment?: number
+  lastInstallment?: number
+  totalPaid?: number
+  totalInterest?: number
+  bankName?: string
+  fgtsAmount?: number
+  consorcioAmount?: number
+}
 
 export interface Proposal {
   id: string
@@ -112,6 +137,10 @@ export interface Proposal {
   payment_terms?: string
   conditions?: string
   status: ProposalStatus
+  negotiation_stage?: NegotiationStage
+  notes_client?: string
+  counter_proposal_notes?: string
+  simulation_data?: ProposalSimulationData
   created: string
   updated: string
   expand?: {

@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -15,15 +9,12 @@ import {
   CheckCircle2,
   ShieldCheck,
   Sparkles,
-  Phone,
-  MessageCircle,
+  Calculator,
+  Clock,
   X,
-  Lock,
-  ArrowRight,
   ChevronRight,
   ChevronLeft,
 } from 'lucide-react'
-import { getWhatsAppUrl, BROKER_PHONE_DISPLAY } from '@/components/FloatingWhatsApp'
 
 export interface ClientStep {
   id: string
@@ -39,72 +30,86 @@ export interface ClientStep {
 const CLIENT_ONBOARDING_STEPS: ClientStep[] = [
   {
     id: 'bem-vindo',
-    title: 'Bem-vindo ao Portal Exclusivo do Cliente',
-    tagline: 'Transparência, agilidade e segurança jurídica com a Vera Lúcia Koren',
+    title: 'Bem-vindo à Sua Área Exclusiva de Negociação',
+    tagline: 'Transparência, simulação inteligente e segurança jurídica com a Vera Lúcia Koren',
     description:
-      'Criamos este ambiente digital para que você acompanhe cada etapa da sua negociação imobiliária em Porto Alegre, desde a visita até a entrega das chaves.',
+      'Criamos este ambiente digital completo para você acompanhar cada etapa da aquisição do seu imóvel em Porto Alegre: desde a visita, envio e ajuste da proposta, envio de documentos e simulação bancária.',
     icon: Sparkles,
     points: [
-      'Ambiente 100% criptografado e privativo para seus dados',
-      'Acesso direto à proposta comercial aprovada com a corretora',
-      'Envio facilitado de documentos para agilizar o financiamento bancário',
+      'Linha do tempo visual com todas as etapas da sua negociação',
+      'Envio e edição direta de propostas comerciais personalizadas',
+      'Cofre seguro com checklist adaptável por modalidade de compra',
+      'Simulador de financiamento manual e comparativo com taxas de bancos reais',
     ],
   },
   {
-    id: 'agendar',
-    title: '1. Agendamento e Visita Presencial',
-    tagline: 'Escolha os melhores dias e horários com facilidade',
+    id: 'timeline',
+    title: '1. Status e Linha do Tempo da Negociação',
+    tagline: 'Acompanhe exatamente em qual etapa seu processo se encontra',
     description:
-      'Você pode solicitar visitas a qualquer momento pelo site oficial ou diretamente com a Vera. As visitas são confirmadas e sincronizadas na agenda oficial.',
-    icon: CalendarDays,
+      'Veja o progresso em tempo real das 8 etapas fundamentais: Visita realizada → Proposta enviada → Em análise → Proposta aprovada → Documentação → Análise de crédito → Contrato assinado → Chaves na mão.',
+    icon: Clock,
     points: [
-      'Escolha de data e turno (manhã, tarde ou final de tarde)',
-      'Acompanhamento presencial exclusivo pela corretora Vera Lúcia Koren',
-      'Orientação sobre detalhes construtivos, incidência solar e vizinhança',
+      'Destaque claro da fase atual com prazos estimados em dias úteis',
+      'Dicas práticas da Vera Lúcia sobre o que esperar de cada momento',
+      'Histórico de contrapropostas e recados da corretora',
     ],
   },
   {
     id: 'proposta',
-    title: '2. Acompanhamento da Proposta Comercial',
-    tagline: 'Clareza em valores, entrada e financiamento',
+    title: '2. Envio e Ajuste de Propostas Comerciais',
+    tagline: 'Defina seu valor de compra, sinal e forma de pagamento',
     description:
-      'Aqui no portal você visualiza o valor formal negociado, entrada/sinal, percentual de financiamento no seu banco de preferência (Itaú, Bradesco, Santander, Caixa) ou permuta.',
+      'Você pode estruturar uma proposta formal escolhendo a forma de pagamento (À vista, Financiamento Bancário, FGTS, Consórcio ou Permuta), definindo a entrada e banco de sua preferência.',
     icon: FileCheck2,
     points: [
-      'Detalhamento das condições e prazos combinados',
-      'Histórico de status: Aguardando Documentos, Em Análise ou Aceita',
-      'Suporte consultivo para encontrar as menores taxas de juros',
+      'Cálculo automático de saldo devedor e percentuais de entrada',
+      'Inclusão de condições especiais como prazos de mudança e mobília fixa',
+      'Registro seguro no sistema com notificação imediata à corretora',
+    ],
+  },
+  {
+    id: 'simulador',
+    title: '3. Simulador de Financiamento Manual e Automático',
+    tagline: 'Compare taxas da Caixa, Itaú, Bradesco, Santander e Banco do Brasil',
+    description:
+      'Calcule com precisão a parcela inicial e final pelos sistemas SAC e PRICE. Ajuste sliders de entrada e anos, use saldo do FGTS ou avalie a alternativa com carta de consórcio.',
+    icon: Calculator,
+    points: [
+      'Comparativo automático destacando a menor parcela entre os bancos',
+      'Botão "Usar esta simulação na minha proposta" para transferir os valores num clique',
+      'Aviso de taxas e suporte consultivo para análise de crédito',
     ],
   },
   {
     id: 'documentos',
-    title: '3. Envio Ágil de Documentos (Cofre Seguro)',
-    tagline: 'Envie fotos pelo celular ou arquivos PDF com segurança',
+    title: '4. Cofre de Documentos Criptografado',
+    tagline: 'Checklist personalizado para sua modalidade de compra',
     description:
-      'Tire uma foto ou anexe seus comprovantes (RG, CPF, Comprovante de Renda, FGTS) direto pelo celular ou computador. A Vera fará a conferência para dar entrada imediata no banco ou cartório.',
+      'Envie fotos pelo celular ou arquivos em PDF dos documentos solicitados (RG/CNH, comprovante de renda, residência, FGTS). Acompanhe o status: pendente, em análise, aprovado ou ajustes solicitados.',
     icon: UploadCloud,
     points: [
-      'Aceita fotos nítidas (JPEG/PNG) e arquivos em PDF',
-      'Confirmação visual instantânea do status de cada documento',
-      'Sem necessidade de deslocamento ou cópias físicas antecipadas',
+      'Checklist inteligente: à vista exige menos documentos que financiamento',
+      'Suporte a drag-and-drop e visualização rápida do documento enviado',
+      'Barra de progresso de conclusão da documentação para agilizar a engenharia',
     ],
   },
   {
     id: 'suporte',
-    title: '4. Atendimento Direto e Pós-Venda',
-    tagline: 'Apoio contínuo até o registro e entrega das chaves',
+    title: '5. Atendimento Exclusivo da Vera Lúcia Koren',
+    tagline: 'Assessoria jurídica e imobiliária completa em Porto Alegre',
     description:
-      'A Vera Lúcia Koren acompanha a minuta do contrato, quitação de ITBI, certidões negativas e registro de imóveis em Porto Alegre, garantindo total tranquilidade.',
+      'A corretora Vera Lúcia Koren (CRECI 38415 - Foxter) acompanha você desde a visita até a lavratura da escritura pública e entrega solene das chaves.',
     icon: ShieldCheck,
     points: [
-      'Contato direto no WhatsApp: (51) 99132-7636',
-      'CRECI 38415 com mais de 12 anos de experiência consolidada na Foxter',
-      'Suporte do início ao término de todo o processo patrimonial',
+      'Canal direto no WhatsApp com um clique no portal: (51) 99132-7636',
+      'Mais de 12 anos de reputação e credibilidade no mercado imobiliário gaúcho',
+      'Segurança total nas minutas, vistorias e conferência de certidões',
     ],
   },
 ]
 
-const STORAGE_KEY_CLIENT = 'vera_client_onboarding_completed_v1'
+const STORAGE_KEY_CLIENT = 'vera_client_onboarding_portal_v2'
 
 interface ClientOnboardingModalProps {
   forceOpen?: boolean
@@ -160,7 +165,7 @@ export function ClientOnboardingModal({
         <div className="bg-gradient-to-r from-[#1A3636] via-[#244848] to-[#142A2A] text-white p-6 relative">
           <div className="absolute top-4 right-4 flex items-center gap-2">
             <Badge className="bg-[#D4AF37] text-[#1A3636] font-bold text-xs border-none">
-              Guia do Cliente
+              Guia da Área do Cliente
             </Badge>
             <button
               onClick={handleClose}
@@ -186,10 +191,10 @@ export function ClientOnboardingModal({
           </div>
 
           <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-xs text-white/70">
-            <span>{current.tagline}</span>
+            <span className="truncate max-w-[320px]">{current.tagline}</span>
             <span className="text-[11px] text-[#D4AF37] font-semibold">{progressPercent}%</span>
           </div>
-          <div className="w-full bg-white/10 h-1 rounded-full mt-1 overflow-hidden">
+          <div className="w-full bg-white/10 h-1.5 rounded-full mt-1.5 overflow-hidden">
             <div
               className="bg-[#D4AF37] h-full rounded-full transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
@@ -203,7 +208,7 @@ export function ClientOnboardingModal({
 
           <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-2">
             <span className="text-xs font-bold text-[#1A3636] uppercase tracking-wider block mb-1">
-              Como Funciona:
+              Recursos Disponíveis:
             </span>
             <ul className="space-y-2 text-xs text-gray-600">
               {current.points.map((pt, i) => (
@@ -224,7 +229,7 @@ export function ClientOnboardingModal({
             onClick={handleClose}
             className="text-xs text-gray-500 hover:text-gray-900"
           >
-            Entendido
+            Pular Tutorial
           </Button>
 
           <div className="flex items-center gap-2">
@@ -246,7 +251,7 @@ export function ClientOnboardingModal({
             >
               {stepIdx === CLIENT_ONBOARDING_STEPS.length - 1 ? (
                 <>
-                  <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" /> Acessar Meu Portal
+                  <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" /> Explorar Meu Portal
                 </>
               ) : (
                 <>
