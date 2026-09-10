@@ -109,8 +109,21 @@ export type ProposalStatus =
   | 'sent'
   | 'docs_pending'
   | 'under_review'
+  | 'counter_sent'
   | 'accepted'
   | 'rejected'
+
+export interface CounterOfferData {
+  value: number
+  down_payment?: number
+  financing_value?: number
+  bank_partner?: string
+  payment_terms?: string
+  conditions?: string
+  valid_until?: string
+  notes?: string
+  created_at: string
+}
 
 export interface ProposalSimulationData {
   amortizationType?: 'SAC' | 'PRICE'
@@ -141,12 +154,40 @@ export interface Proposal {
   notes_client?: string
   counter_proposal_notes?: string
   simulation_data?: ProposalSimulationData
+  counter_offer?: CounterOfferData
+  access_token?: string
   created: string
   updated: string
   expand?: {
     client_id?: Client
     property_id?: Property
   }
+}
+
+export type NotificationType =
+  | 'proposal_new'
+  | 'proposal_updated'
+  | 'document_uploaded'
+  | 'counter_accepted'
+  | 'counter_rejected'
+  | 'general'
+
+export interface AppNotification {
+  id: string
+  collectionId: string
+  collectionName: string
+  title: string
+  message: string
+  type: NotificationType
+  client_name?: string
+  client_id?: string
+  proposal_id?: string
+  link?: string
+  read: boolean
+  metadata?: Record<string, any>
+  created: string
+  updated: string
+  [key: string]: any
 }
 
 export type DocumentStatus = 'pending' | 'verified' | 'rejected'

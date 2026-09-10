@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { BrokerOnboardingModal } from '@/components/BrokerOnboardingModal'
+import { NotificationBell } from '@/components/NotificationBell'
 
 export default function Layout() {
   const { user, isAdmin, clientPortal, logout, loginAsAdmin } = useAuth()
@@ -56,7 +57,7 @@ export default function Layout() {
       {!isClientRoute && (
         <aside className="hidden md:flex flex-col w-72 bg-[#1A3636] text-white border-r border-[#2A4D4D] min-h-screen sticky top-0 h-screen z-30 select-none">
           {/* Brand Header */}
-          <div className="p-6 border-b border-white/10 flex flex-col items-start gap-1">
+          <div className="p-6 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-7 bg-[#D4AF37] rounded-sm inline-block" />
               <div>
@@ -66,6 +67,7 @@ export default function Layout() {
                 </p>
               </div>
             </div>
+            <NotificationBell />
           </div>
 
           {/* Navigation Links */}
@@ -216,6 +218,7 @@ export default function Layout() {
           </div>
 
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <Button
               variant="ghost"
               size="icon"

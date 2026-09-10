@@ -131,6 +131,8 @@ export function inferStageFromProposal(
       return 'proposta_enviada'
     case 'sent':
       return 'proposta_em_analise'
+    case 'counter_sent':
+      return 'proposta_em_analise'
     case 'docs_pending':
       return 'documentacao'
     case 'under_review':

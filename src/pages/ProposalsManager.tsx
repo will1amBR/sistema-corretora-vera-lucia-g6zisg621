@@ -13,6 +13,7 @@ import {
   Plus,
   Trash2,
   ExternalLink,
+  Sparkles,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -33,7 +34,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import { getProposals, updateProposalStatus, deleteProposal } from '@/services/proposals'
+import {
+  getProposals,
+  updateProposalStatus,
+  deleteProposal,
+  sendCounterProposal,
+} from '@/services/proposals'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { getDocuments, updateDocumentStatus, getDocumentDownloadUrl } from '@/services/documents'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Proposal, ClientDocument, ProposalStatus, DocumentStatus } from '@/types'
@@ -43,6 +52,10 @@ const PROPOSAL_STATUS_LABELS: Record<ProposalStatus, { label: string; color: str
   sent: { label: 'Enviada ao Cliente', color: 'bg-blue-100 text-blue-700' },
   docs_pending: { label: 'Aguardando Documentos', color: 'bg-amber-100 text-amber-800' },
   under_review: { label: 'Documentos em Análise', color: 'bg-indigo-100 text-indigo-700' },
+  counter_sent: {
+    label: 'Contraproposta Enviada',
+    color: 'bg-[#D4AF37]/20 text-[#1A3636] font-bold border border-[#D4AF37]/50',
+  },
   accepted: { label: 'Proposta Aceita', color: 'bg-emerald-100 text-emerald-800' },
   rejected: { label: 'Recusada', color: 'bg-red-100 text-red-700' },
 }
@@ -57,6 +70,19 @@ export default function ProposalsManager() {
   const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null)
   const [newStatus, setNewStatus] = useState<ProposalStatus>('docs_pending')
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+
+  // Counter Proposal Modal
+  const [isCounterModalOpen, setIsCounterModalOpen] = useState(false)
+  const [counterProp, setCounterProp] = useState<Proposal | null>(null)
+  const [counterValue, setCounterValue] = useState<number>(0)
+  const [counterDown, setCounterDown] = useState<number>(0)
+  const [counterFinance, setCounterFinance] = useState<number>(0)
+  const [counterBank, setCounterBank] = useState<string>('')
+  const [counterTerms, setCounterTerms] = useState<string>('')
+  const [counterConditions, setCounterConditions] = useState<string>('')
+  const [counterValidUntil, setCounterValidUntil] = useState<string>('')
+  const [counterNotes, setCounterNotes] = useState<string>('')
+  const [isSendingCounter, setIsSendingCounter] = useState(false)
 
   const loadData = async () => {
     try {
@@ -79,6 +105,72 @@ export default function ProposalsManager() {
     setSelectedProposal(proposal)
     setNewStatus(proposal.status)
     setIsStatusModalOpen(true)
+  }
+
+  const handleOpenCounterModal = (proposal: Proposal) => {
+    setCounterProp(proposal)
+    const originalVal = proposal.value || 0
+    // Pre-fill with reasonable counteroffer values
+    setCounterValue(originalVal)
+    setCounterDown(proposal.down_payment || Math.round(originalVal * 0.2))
+    setCounterFinance(proposal.financing_value || Math.round(originalVal * 0.8))
+    setCounterBank(proposal.bank_partner || 'Itaú Unibanco')
+    setCounterTerms(
+      proposal.payment_terms ||
+        'Entrada de 20% no ato do compromisso + saldo via financiamento bancário.',
+    )
+    setCounterConditions(
+      proposal.conditions || 'Manutenção dos móveis planejados e luminárias fixas.',
+    )
+    // Default 5 days validity
+    const d = new Date()
+    d.setDate(d.getDate() + 5)
+    setCounterValidUntil(d.toISOString().split('T')[0])
+    setCounterNotes('')
+    setIsCounterModalOpen(true)
+  }
+
+  const handleSendCounter = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!counterProp) return
+    if (counterValue <= 0) {
+      toast({
+        title: 'Valor inválido',
+        description: 'Informe um valor para a contraproposta.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    try {
+      setIsSendingCounter(true)
+      await sendCounterProposal(counterProp.id, {
+        value: counterValue,
+        down_payment: counterDown,
+        financing_value: counterFinance,
+        bank_partner: counterBank,
+        payment_terms: counterTerms,
+        conditions: counterConditions,
+        valid_until: counterValidUntil,
+        notes: counterNotes,
+      })
+
+      toast({
+        title: 'Contraproposta enviada com sucesso!',
+        description:
+          'O cliente agora vê a contraproposta destacada no portal e pode aceitar ou negociar.',
+      })
+      setIsCounterModalOpen(false)
+      loadData()
+    } catch (err: any) {
+      toast({
+        title: 'Erro ao enviar contraproposta',
+        description: err.message,
+        variant: 'destructive',
+      })
+    } finally {
+      setIsSendingCounter(false)
+    }
   }
 
   const handleUpdateStatus = async () => {
@@ -232,6 +324,44 @@ export default function ProposalsManager() {
                         </div>
                       )}
 
+                      {/* Display active counteroffer if present */}
+                      {prop.counter_offer && (
+                        <div className="p-3 bg-amber-50/70 border border-[#D4AF37]/50 rounded-lg space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-[#1A3636] uppercase tracking-wide flex items-center gap-1">
+                              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" /> Contraproposta da
+                              Vera
+                            </span>
+                            {prop.status === 'counter_sent' && (
+                              <Badge className="bg-[#D4AF37] text-[#1A3636] text-[9px] font-bold">
+                                Aguardando Cliente
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-600">Valor Contraproposto:</span>
+                            <span className="font-bold text-sm text-[#1A3636]">
+                              R$ {prop.counter_offer.value?.toLocaleString('pt-BR')}
+                            </span>
+                          </div>
+                          {prop.counter_offer.valid_until && (
+                            <p className="text-[10px] text-gray-500">
+                              Validade até:{' '}
+                              <strong>
+                                {new Date(
+                                  prop.counter_offer.valid_until + 'T23:59:59',
+                                ).toLocaleDateString('pt-BR')}
+                              </strong>
+                            </p>
+                          )}
+                          {prop.counter_offer.notes && (
+                            <p className="text-[11px] text-gray-700 italic border-t border-amber-200/50 pt-1 mt-1">
+                              "{prop.counter_offer.notes}"
+                            </p>
+                          )}
+                        </div>
+                      )}
+
                       {/* Attached Documents */}
                       <div className="pt-2 border-t border-gray-100">
                         <span className="font-semibold text-gray-700 flex items-center gap-1 mb-2">
@@ -300,7 +430,7 @@ export default function ProposalsManager() {
                   </div>
 
                   {/* Actions */}
-                  <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                  <div className="p-4 bg-gray-50 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -310,13 +440,25 @@ export default function ProposalsManager() {
                       <Trash2 className="w-3.5 h-3.5 mr-1" /> Excluir
                     </Button>
 
-                    <Button
-                      size="sm"
-                      onClick={() => handleOpenStatusModal(prop)}
-                      className="bg-[#1A3636] text-white hover:bg-[#254d4d] text-xs"
-                    >
-                      Alterar Status
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleOpenCounterModal(prop)}
+                        className="border-[#D4AF37] text-[#1A3636] hover:bg-[#D4AF37]/10 text-xs font-semibold gap-1"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                        <span>Contraproposta</span>
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        onClick={() => handleOpenStatusModal(prop)}
+                        className="bg-[#1A3636] text-white hover:bg-[#254d4d] text-xs"
+                      >
+                        Alterar Status
+                      </Button>
+                    </div>
                   </div>
                 </Card>
               )
@@ -324,6 +466,167 @@ export default function ProposalsManager() {
           </div>
         )}
       </div>
+
+      {/* Counter Proposal Modal */}
+      <Dialog open={isCounterModalOpen} onOpenChange={setIsCounterModalOpen}>
+        <DialogContent className="max-w-lg p-6 bg-white max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-[#1A3636] flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#D4AF37]" />
+              Enviar Contraproposta ao Cliente
+            </DialogTitle>
+            <DialogDescription className="text-xs text-gray-500">
+              {counterProp?.expand?.client_id?.name} • {counterProp?.expand?.property_id?.title}
+              <br />
+              Proposta original do cliente: R${' '}
+              <strong>{counterProp?.value?.toLocaleString('pt-BR')}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSendCounter} className="space-y-4 py-2 text-xs">
+            {/* New Offered Value */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-[#1A3636]">
+                Novo Valor da Contraproposta (R$)
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-xs text-gray-400 font-bold">R$</span>
+                <Input
+                  type="number"
+                  value={counterValue || ''}
+                  onChange={(e) => {
+                    const val = Number(e.target.value) || 0
+                    setCounterValue(val)
+                    const down = Math.round(val * 0.2)
+                    setCounterDown(down)
+                    setCounterFinance(Math.max(0, val - down))
+                  }}
+                  className="pl-9 font-bold text-sm text-[#1A3636]"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Down Payment & Financing */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-[11px] text-gray-700 font-semibold">
+                  Entrada Sugerida (R$)
+                </Label>
+                <Input
+                  type="number"
+                  value={counterDown || ''}
+                  onChange={(e) => {
+                    const val = Number(e.target.value) || 0
+                    setCounterDown(val)
+                    setCounterFinance(Math.max(0, counterValue - val))
+                  }}
+                  className="text-xs font-semibold"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-[11px] text-gray-700 font-semibold">
+                  Saldo Financiado (R$)
+                </Label>
+                <Input
+                  type="number"
+                  value={counterFinance || ''}
+                  onChange={(e) => setCounterFinance(Number(e.target.value) || 0)}
+                  className="text-xs font-semibold"
+                />
+              </div>
+            </div>
+
+            {/* Bank partner & validity */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-[11px] text-gray-700 font-semibold">
+                  Banco / Financiador
+                </Label>
+                <Input
+                  type="text"
+                  value={counterBank}
+                  onChange={(e) => setCounterBank(e.target.value)}
+                  className="text-xs"
+                  placeholder="Ex: Itaú Unibanco / Caixa"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-[11px] text-gray-700 font-semibold">Prazo de Validade</Label>
+                <Input
+                  type="date"
+                  value={counterValidUntil}
+                  onChange={(e) => setCounterValidUntil(e.target.value)}
+                  className="text-xs"
+                />
+              </div>
+            </div>
+
+            {/* Conditions */}
+            <div className="space-y-1">
+              <Label className="text-[11px] text-gray-700 font-semibold">
+                Forma de Pagamento e Prazos
+              </Label>
+              <Textarea
+                rows={2}
+                value={counterTerms}
+                onChange={(e) => setCounterTerms(e.target.value)}
+                className="text-xs leading-relaxed"
+                placeholder="Ex: 20% no compromisso de compra e venda + saldo via repasse bancário em até 45 dias."
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-[11px] text-gray-700 font-semibold">
+                Condições Adicionais / Benfeitorias
+              </Label>
+              <Textarea
+                rows={2}
+                value={counterConditions}
+                onChange={(e) => setCounterConditions(e.target.value)}
+                className="text-xs leading-relaxed"
+                placeholder="Ex: Inclusos ar-condicionados split e armários planejados da suíte."
+              />
+            </div>
+
+            {/* Recado da Vera para o cliente */}
+            <div className="space-y-1">
+              <Label className="text-[11px] text-[#1A3636] font-bold">
+                Mensagem Pessoal da Vera ao Cliente (Aparecerá com destaque no Portal)
+              </Label>
+              <Textarea
+                rows={2}
+                value={counterNotes}
+                onChange={(e) => setCounterNotes(e.target.value)}
+                className="text-xs leading-relaxed border-amber-300 bg-amber-50/40"
+                placeholder="Ex: Prezado Rodrigo, conversamos com o proprietário e conseguimos chegar neste ponto de equilíbrio que atende ambas as partes."
+              />
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsCounterModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isSendingCounter}
+                className="bg-[#1A3636] hover:bg-[#254d4d] text-white font-bold text-xs gap-1.5"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                {isSendingCounter ? 'Enviando...' : 'Enviar Contraproposta'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Change Status Modal */}
       <Dialog open={isStatusModalOpen} onOpenChange={setIsStatusModalOpen}>

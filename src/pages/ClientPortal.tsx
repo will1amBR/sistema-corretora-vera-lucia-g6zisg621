@@ -37,7 +37,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/use-auth'
 import { getClientByPortalToken, getClientById } from '@/services/clients'
-import { getProposalsByClientId } from '@/services/proposals'
+import { getProposalsByClientId, acceptCounterProposal } from '@/services/proposals'
 import { getDocumentsByClientId } from '@/services/documents'
 import { getProperties } from '@/services/properties'
 import { ClientOnboardingModal } from '@/components/ClientOnboardingModal'
@@ -155,6 +155,47 @@ export default function ClientPortal() {
     if (client) loadClientData(client.id)
   }
 
+  // Handle client accepting Vera's counterproposal
+  const [isAcceptingCounter, setIsAcceptingCounter] = useState(false)
+  const handleAcceptCounter = async (proposalId: string) => {
+    try {
+      setIsAcceptingCounter(true)
+      const updated = await acceptCounterProposal(proposalId)
+      toast({
+        title: '🎉 Contraproposta Aceita com Sucesso!',
+        description:
+          'Parabéns! Você aceitou os termos da contraproposta. A corretora Vera Lúcia foi notificada imediatamente e entrará em contato para os próximos passos.',
+      })
+      setProposals((prev) => prev.map((p) => (p.id === proposalId ? updated : p)))
+      if (client) loadClientData(client.id)
+    } catch (err: any) {
+      toast({
+        title: 'Erro ao aceitar contraproposta',
+        description: err.message,
+        variant: 'destructive',
+      })
+    } finally {
+      setIsAcceptingCounter(false)
+    }
+  }
+
+  // Handle client wanting to renegotiate
+  const handleRenegotiate = (counterOffer: any) => {
+    if (counterOffer?.value) {
+      setStagedSimulationData({
+        propertyValue: counterOffer.value,
+        downPayment: counterOffer.down_payment,
+        financingValue: counterOffer.financing_value,
+        bankName: counterOffer.bank_partner,
+      })
+    }
+    setActiveTab('proposal')
+    toast({
+      title: 'Ajuste de Proposta',
+      description: 'O formulário foi pré-carregado com os termos para você fazer uma nova rodada.',
+    })
+  }
+
   // Unauthenticated login view
   if (!client && !loading) {
     return (
@@ -265,6 +306,14 @@ export default function ClientPortal() {
         desc: 'Aguarde a emissão do parecer da engenharia e validação do banco escolhido.',
         tab: 'overview' as const,
         btnText: 'Ver Linha do Tempo',
+      }
+    }
+    if (activeProposal.status === 'counter_sent') {
+      return {
+        title: 'Contraproposta Recebida da Vera Lúcia!',
+        desc: 'Vera analisou sua proposta com o proprietário e enviou uma contraproposta comercial. Avalie as novas condições.',
+        tab: 'overview' as const,
+        btnText: 'Analisar Contraproposta',
       }
     }
     if (activeProposal.status === 'accepted') {
@@ -468,11 +517,158 @@ export default function ClientPortal() {
         {/* TAB 1: OVERVIEW & NEGOTIATION TIMELINE */}
         <TabsContent value="overview" className="space-y-6">
           <NegotiationTimeline
-            currentStage={activeProposal?.negotiation_stage}
+            currentStage={
+              activeProposal?.status === 'counter_sent'
+                ? 'proposta_em_analise'
+                : activeProposal?.negotiation_stage
+            }
             proposalStatus={activeProposal?.status}
             lastUpdatedDate={activeProposal?.updated || client?.updated}
             propertyTitle={interestedProperty?.title}
           />
+
+          {/* HIGHLIGHTED COUNTER-OFFER CARD FOR CLIENT */}
+          {activeProposal && activeProposal.counter_offer && (
+            <Card className="card-elevated border-2 border-[#D4AF37] bg-gradient-to-br from-amber-50/40 via-white to-amber-50/20 shadow-lg overflow-hidden animate-fade-in">
+              <div className="bg-[#1A3636] text-white p-4 px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#D4AF37]">
+                <div className="flex items-center gap-2">
+                  <span className="p-1.5 rounded-md bg-[#D4AF37] text-[#1A3636]">
+                    <Sparkles className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <h3 className="font-bold text-sm tracking-wide text-white">
+                      CONTRAPROPOSTA COMERCIAL DA CORRETORA VERA LÚCIA
+                    </h3>
+                    <p className="text-[11px] text-[#D4AF37]">
+                      Condições ajustadas para fechamento do negócio
+                    </p>
+                  </div>
+                </div>
+
+                <Badge className="bg-[#D4AF37] text-[#1A3636] font-bold text-xs">
+                  {activeProposal.status === 'accepted'
+                    ? '✓ Aceita por Você'
+                    : 'Aguardando Sua Decisão'}
+                </Badge>
+              </div>
+
+              <CardContent className="p-6 space-y-5">
+                {/* Personal note from Vera */}
+                {activeProposal.counter_offer.notes && (
+                  <div className="p-3.5 bg-white rounded-xl border border-amber-200/80 shadow-2xs space-y-1">
+                    <span className="text-[11px] font-bold text-[#1A3636] uppercase tracking-wide flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Recado Pessoal da
+                      Vera Lúcia:
+                    </span>
+                    <p className="text-xs text-gray-700 leading-relaxed italic">
+                      "{activeProposal.counter_offer.notes}"
+                    </p>
+                  </div>
+                )}
+
+                {/* Values Comparison Table */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3.5 bg-white rounded-xl border border-gray-200 shadow-2xs">
+                    <span className="text-gray-400 block text-[11px]">Novo Valor Proposto</span>
+                    <span className="font-bold text-lg text-[#1A3636]">
+                      R$ {activeProposal.counter_offer.value?.toLocaleString('pt-BR')}
+                    </span>
+                    {activeProposal.value && (
+                      <span className="text-[10px] text-gray-500 block mt-0.5">
+                        Sua proposta: R$ {activeProposal.value.toLocaleString('pt-BR')}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="p-3.5 bg-white rounded-xl border border-gray-200 shadow-2xs">
+                    <span className="text-gray-400 block text-[11px]">Entrada Sugerida</span>
+                    <span className="font-bold text-base text-[#1A3636]">
+                      R${' '}
+                      {activeProposal.counter_offer.down_payment?.toLocaleString('pt-BR') || '--'}
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 bg-white rounded-xl border border-gray-200 shadow-2xs">
+                    <span className="text-gray-400 block text-[11px]">Financiamento</span>
+                    <span className="font-bold text-base text-emerald-800">
+                      R${' '}
+                      {activeProposal.counter_offer.financing_value?.toLocaleString('pt-BR') ||
+                        '--'}
+                    </span>
+                    {activeProposal.counter_offer.bank_partner && (
+                      <span className="text-[10px] text-gray-500 block mt-0.5">
+                        {activeProposal.counter_offer.bank_partner}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Conditions / Terms */}
+                {(activeProposal.counter_offer.payment_terms ||
+                  activeProposal.counter_offer.conditions) && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    {activeProposal.counter_offer.payment_terms && (
+                      <div className="p-3 bg-white rounded-lg border border-gray-200">
+                        <strong className="text-gray-700 block mb-1">Prazos e Pagamento:</strong>
+                        <p className="text-gray-600 leading-relaxed">
+                          {activeProposal.counter_offer.payment_terms}
+                        </p>
+                      </div>
+                    )}
+                    {activeProposal.counter_offer.conditions && (
+                      <div className="p-3 bg-white rounded-lg border border-gray-200">
+                        <strong className="text-gray-700 block mb-1">
+                          Condições & Benfeitorias:
+                        </strong>
+                        <p className="text-gray-600 leading-relaxed">
+                          {activeProposal.counter_offer.conditions}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Validity and Action Buttons */}
+                <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-t border-amber-200/50">
+                  {activeProposal.counter_offer.valid_until && (
+                    <div className="text-[11px] text-gray-500 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-amber-600" />
+                      <span>
+                        Condições válidas até{' '}
+                        <strong>
+                          {new Date(
+                            activeProposal.counter_offer.valid_until + 'T23:59:59',
+                          ).toLocaleDateString('pt-BR')}
+                        </strong>
+                      </span>
+                    </div>
+                  )}
+
+                  {activeProposal.status === 'counter_sent' && (
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRenegotiate(activeProposal.counter_offer)}
+                        className="text-xs border-gray-300 text-gray-700 hover:bg-gray-100 flex-1 sm:flex-initial"
+                      >
+                        Negociar Novamente
+                      </Button>
+                      <Button
+                        size="sm"
+                        disabled={isAcceptingCounter}
+                        onClick={() => handleAcceptCounter(activeProposal.id)}
+                        className="bg-[#1A3636] hover:bg-[#254d4d] text-white font-bold text-xs gap-1.5 flex-1 sm:flex-initial shadow-md"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#D4AF37]" />
+                        {isAcceptingCounter ? 'Processando...' : 'Aceitar Contraproposta'}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Quick Summary of Current Proposal if exists */}
           {activeProposal && (

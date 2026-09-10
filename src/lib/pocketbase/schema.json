@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T03:40:45.299Z",
+  "generatedAt": "2026-09-10T16:18:53.439Z",
   "collections": [
     {
       "name": "users",
@@ -395,6 +395,7 @@
             "sent",
             "docs_pending",
             "under_review",
+            "counter_sent",
             "accepted",
             "rejected"
           ]
@@ -446,6 +447,18 @@
             "contrato_assinado",
             "concluido"
           ]
+        },
+        {
+          "name": "counter_offer",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "access_token",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [
@@ -596,6 +609,99 @@
         }
       ],
       "indexes": ["CREATE INDEX idx_objections_cat ON objections (category)"]
+    },
+    {
+      "name": "notifications",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "",
+        "update": "",
+        "delete": ""
+      },
+      "fields": [
+        {
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "message",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "type",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": [
+            "proposal_new",
+            "proposal_updated",
+            "document_uploaded",
+            "counter_accepted",
+            "counter_rejected",
+            "general"
+          ]
+        },
+        {
+          "name": "client_name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "client_id",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "proposal_id",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "link",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "read",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "metadata",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_notifications_read ON notifications (read)",
+        "CREATE INDEX idx_notifications_created ON notifications (created)"
+      ]
     }
   ]
 }
