@@ -23,6 +23,7 @@ import {
   Building2,
   Calendar,
   FileCheck2,
+  FileText,
   Percent,
   MessageCircle,
   ExternalLink,
@@ -40,9 +41,34 @@ import {
 } from 'lucide-react'
 import { getWhatsAppUrl, BROKER_PHONE_DISPLAY } from '@/components/FloatingWhatsApp'
 import { getProposalsByClientId } from '@/services/proposals'
+import {
+  getDocumentsByClientId,
+  updateDocumentStatusWithHistory,
+  getDocumentDownloadUrl,
+} from '@/services/documents'
+import { formatRelativeTime, CHECKLIST_BY_MODALITY } from '@/components/DocumentVault'
+import { NEGOTIATION_STAGES, inferStageFromProposal } from '@/components/NegotiationTimeline'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { useToast } from '@/hooks/use-toast'
 import { KANBAN_STAGES } from './CRMKanbanColumn'
 import { formatLeadAge, getFinancialSummary } from './CRMKanbanCard'
-import type { Client, Property, Proposal, ClientStatus } from '@/types'
+import type {
+  Client,
+  Property,
+  Proposal,
+  ClientStatus,
+  ClientDocument,
+  DocumentStatus,
+} from '@/types'
 
 interface ClientDetailDrawerProps {
   client: Client | null
@@ -67,9 +93,19 @@ export function ClientDetailDrawer({
   onPropertyClick,
   onCreateProposalForClient,
 }: ClientDetailDrawerProps) {
+  const { toast } = useToast()
   const [proposals, setProposals] = useState<Proposal[]>([])
+  const [clientDocuments, setClientDocuments] = useState<ClientDocument[]>([])
   const [loadingProposals, setLoadingProposals] = useState(false)
+  const [loadingDocs, setLoadingDocs] = useState(false)
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+
+  // Document review modal inside CRM
+  const [reviewingDoc, setReviewingDoc] = useState<ClientDocument | null>(null)
+  const [reviewAction, setReviewAction] = useState<DocumentStatus>('verified')
+  const [reviewNotes, setReviewNotes] = useState<string>('')
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false)
 
   // Find interested properties
   const interestedProps: Property[] = React.useMemo(() => {
@@ -84,22 +120,109 @@ export function ClientDetailDrawer({
     return properties.filter((p) => ids.has(p.id))
   }, [client, properties])
 
-  // Load client proposals when drawer opens
+  // Load client proposals & documents when drawer opens
+  const loadClientDrawerData = async () => {
+    if (!client) return
+    try {
+      setLoadingProposals(true)
+      setLoadingDocs(true)
+      const [props, docs] = await Promise.all([
+        getProposalsByClientId(client.id),
+        getDocumentsByClientId(client.id),
+      ])
+      setProposals(props)
+      setClientDocuments(docs)
+    } catch (err) {
+      console.error('Erro ao carregar dados do cliente no drawer', err)
+    } finally {
+      setLoadingProposals(false)
+      setLoadingDocs(false)
+    }
+  }
+
   useEffect(() => {
     if (client && isOpen) {
-      setLoadingProposals(true)
-      getProposalsByClientId(client.id)
-        .then((props) => setProposals(props))
-        .catch((err) => console.error('Erro ao carregar propostas do cliente', err))
-        .finally(() => setLoadingProposals(false))
+      loadClientDrawerData()
     }
   }, [client, isOpen])
+
+  const handleOpenDocReviewModal = (doc: ClientDocument, targetStatus: DocumentStatus) => {
+    setReviewingDoc(doc)
+    setReviewAction(targetStatus)
+    setReviewNotes(
+      doc.notes ||
+        (targetStatus === 'verified'
+          ? 'Documento perfeitamente legível e válido para tramitação.'
+          : 'Por favor reenviar com documento frente e verso nítidos.'),
+    )
+    setIsReviewModalOpen(true)
+  }
+
+  const handleConfirmDocReview = async () => {
+    if (!reviewingDoc) return
+    setIsSubmittingReview(true)
+    try {
+      await updateDocumentStatusWithHistory({
+        id: reviewingDoc.id,
+        status: reviewAction,
+        notes: reviewNotes,
+        actorName: 'Vera Lúcia Koren',
+        currentDoc: reviewingDoc,
+      })
+      toast({
+        title:
+          reviewAction === 'verified'
+            ? '✓ Documento Aprovado com Sucesso!'
+            : '✕ Ajuste Solicitado ao Cliente',
+        description: 'Status e observação foram sincronizados com o portal do cliente.',
+      })
+      setIsReviewModalOpen(false)
+      if (client) {
+        const docs = await getDocumentsByClientId(client.id)
+        setClientDocuments(docs)
+      }
+    } catch (err: any) {
+      toast({
+        title: 'Erro ao salvar avaliação do documento',
+        description: err.message,
+        variant: 'destructive',
+      })
+    } finally {
+      setIsSubmittingReview(false)
+    }
+  }
 
   if (!client) return null
 
   const fb = client.financial_breakdown
   const financialSummary = getFinancialSummary(client)
   const leadAge = formatLeadAge(client.created)
+
+  // Quick Negotiation Progress Metrics for Vera
+  const activeProposal = proposals[0] || null
+  const currentStageKey = inferStageFromProposal(
+    activeProposal?.status,
+    activeProposal?.negotiation_stage,
+  )
+  const currentStageObj =
+    NEGOTIATION_STAGES.find((s) => s.key === currentStageKey) || NEGOTIATION_STAGES[0]
+  const currentOrder = currentStageObj.order
+  const negotiationProgressPercent = Math.round((currentOrder / NEGOTIATION_STAGES.length) * 100)
+
+  const activeModality = client.purchase_modality || 'financiamento'
+  const relevantChecklist = CHECKLIST_BY_MODALITY.filter((item) =>
+    item.requiredFor.includes(activeModality),
+  )
+  const totalRequiredDocs = relevantChecklist.length
+  const uploadedDocsCount = relevantChecklist.filter((req) =>
+    clientDocuments.some((d) => d.type === req.type),
+  ).length
+  const verifiedDocsCount = relevantChecklist.filter((req) => {
+    const doc = clientDocuments.find((d) => d.type === req.type)
+    return doc && doc.status === 'verified'
+  }).length
+  const docCompletionPercent =
+    totalRequiredDocs > 0 ? Math.round((uploadedDocsCount / totalRequiredDocs) * 100) : 0
 
   // Build Vera WhatsApp Message
   const primaryPropTitle = interestedProps[0]?.title || client.expand?.visit_property_id?.title
@@ -167,7 +290,7 @@ export function ClientDetailDrawer({
           {/* Status selector directly inside drawer */}
           <div className="mt-4 pt-3 border-t border-gray-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-2xs">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-[#1A3636]">Etapa do Funil:</span>
+              <span className="text-xs font-bold text-[#1A3636]">Funil CRM:</span>
               <Badge className="bg-[#1A3636] text-[#D4AF37] text-xs font-semibold">
                 {KANBAN_STAGES.find((s) => s.key === client.status)?.label || client.status}
               </Badge>
@@ -190,6 +313,47 @@ export function ClientDetailDrawer({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          {/* Quick Context Summary Card for Vera (Contexto Imediato) */}
+          <div className="mt-3 p-3 bg-gradient-to-r from-emerald-50/60 via-amber-50/30 to-white rounded-xl border border-emerald-200/70 grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+            <div className="space-y-0.5">
+              <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">
+                Etapa da Negociação
+              </span>
+              <span className="font-bold text-[#1A3636] block truncate">
+                {currentStageObj.title}
+              </span>
+              <span className="text-[10px] text-emerald-800">
+                Progresso: {negotiationProgressPercent}%
+              </span>
+            </div>
+
+            <div className="space-y-0.5">
+              <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">
+                Cofre de Documentos
+              </span>
+              <span className="font-bold text-[#1A3636] block">
+                {uploadedDocsCount}/{totalRequiredDocs} ({docCompletionPercent}%)
+              </span>
+              <span className="text-[10px] text-gray-500">
+                {verifiedDocsCount} aprovados • {uploadedDocsCount - verifiedDocsCount} em análise
+              </span>
+            </div>
+
+            <div className="space-y-0.5">
+              <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">
+                Proposta Ativa
+              </span>
+              <span className="font-bold text-emerald-800 block truncate">
+                {activeProposal
+                  ? `R$ ${activeProposal.value?.toLocaleString('pt-BR')}`
+                  : 'Nenhuma emitida'}
+              </span>
+              <span className="text-[10px] text-gray-500 capitalize">
+                {activeProposal ? activeProposal.status.replace('_', ' ') : 'Sem proposta'}
+              </span>
             </div>
           </div>
         </SheetHeader>
@@ -220,15 +384,18 @@ export function ClientDetailDrawer({
           </div>
 
           <Tabs defaultValue="geral" className="w-full">
-            <TabsList className="grid grid-cols-3 mb-4 bg-gray-100 p-1">
+            <TabsList className="grid grid-cols-4 mb-4 bg-gray-100 p-1">
               <TabsTrigger value="geral" className="text-xs">
                 Perfil & Contatos
               </TabsTrigger>
               <TabsTrigger value="financeiro" className="text-xs">
-                Composição Financeira
+                Financeiro
+              </TabsTrigger>
+              <TabsTrigger value="documentos" className="text-xs">
+                Documentos ({clientDocuments.length})
               </TabsTrigger>
               <TabsTrigger value="imoveis" className="text-xs">
-                Imóveis & Propostas ({interestedProps.length + proposals.length})
+                Imóveis ({interestedProps.length})
               </TabsTrigger>
             </TabsList>
 
@@ -422,7 +589,138 @@ export function ClientDetailDrawer({
               </div>
             </TabsContent>
 
-            {/* TAB 3: IMÓVEIS & PROPOSTAS */}
+            {/* TAB 3: DOCUMENTOS COM HISTÓRICO VISÍVEL PARA VERA */}
+            <TabsContent value="documentos" className="space-y-4 m-0">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <h4 className="font-bold text-xs text-[#1A3636] uppercase tracking-wider flex items-center gap-1.5">
+                    <FileCheck2 className="w-4 h-4 text-[#D4AF37]" />
+                    Cofre de Documentos do Cliente
+                  </h4>
+                  <p className="text-[11px] text-gray-500">
+                    Histórico de versões, datas de envio e observações para o cliente.
+                  </p>
+                </div>
+                <Badge className="bg-[#1A3636] text-[#D4AF37] text-xs">
+                  {uploadedDocsCount} de {totalRequiredDocs} itens
+                </Badge>
+              </div>
+
+              {loadingDocs ? (
+                <div className="p-4 text-center text-gray-400">Carregando documentos...</div>
+              ) : clientDocuments.length === 0 ? (
+                <div className="p-6 bg-gray-50 rounded-xl border border-gray-200 text-center space-y-2">
+                  <FileText className="w-8 h-8 text-gray-400 mx-auto" />
+                  <p className="text-xs text-gray-600 font-semibold">
+                    Nenhum documento enviado pelo cliente ainda.
+                  </p>
+                  <p className="text-[11px] text-gray-400">
+                    O cliente pode enviar direto pelo portal seguro em /portal.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {clientDocuments.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="p-3.5 rounded-xl bg-white border border-gray-200 space-y-2.5 shadow-2xs hover:border-[#D4AF37]/50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-xs text-[#1A3636]">
+                              {doc.type || doc.title}
+                            </span>
+                            {doc.version && doc.version > 1 && (
+                              <Badge className="bg-[#1A3636] text-[#D4AF37] text-[9px] font-bold border-none">
+                                v{doc.version} (Reenviado)
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-gray-400 block truncate max-w-xs">
+                            {doc.title}
+                          </span>
+                        </div>
+
+                        <Badge
+                          variant="outline"
+                          className={`text-[9px] font-bold ${
+                            doc.status === 'verified'
+                              ? 'text-emerald-800 bg-emerald-50 border-emerald-300'
+                              : doc.status === 'rejected'
+                                ? 'text-red-800 bg-red-50 border-red-300'
+                                : 'text-amber-800 bg-amber-50 border-amber-300'
+                          }`}
+                        >
+                          {doc.status === 'verified' && '✓ Aprovado'}
+                          {doc.status === 'rejected' && '✕ Recusado'}
+                          {doc.status === 'pending' && '⏳ Em Análise'}
+                        </Badge>
+                      </div>
+
+                      {/* Timestamps */}
+                      <div className="flex items-center justify-between text-[10px] text-gray-500 pt-1 border-t border-gray-100">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-[#D4AF37]" />
+                          Enviado {formatRelativeTime(doc.updated || doc.created)}
+                        </span>
+                        {doc.reviewed_at && (
+                          <span className="text-emerald-800 font-medium">
+                            Conferido em {new Date(doc.reviewed_at).toLocaleDateString('pt-BR')}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Observação da Vera */}
+                      {doc.notes && (
+                        <div className="p-2 bg-amber-50/70 rounded-lg border border-amber-200/80 text-[11px] text-gray-700">
+                          <strong className="text-[#1A3636] block text-[10px]">
+                            Observação Registrada para o Cliente:
+                          </strong>
+                          <p className="italic mt-0.5">{doc.notes}</p>
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+                        {doc.file ? (
+                          <a
+                            href={getDocumentDownloadUrl(doc)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-[#1A3636] hover:underline"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5 text-[#D4AF37]" /> Abrir Arquivo
+                          </a>
+                        ) : (
+                          <span className="text-[10px] text-gray-400">Sem anexo</span>
+                        )}
+
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleOpenDocReviewModal(doc, 'rejected')}
+                            className="h-7 text-[10px] text-red-700 border-red-200 hover:bg-red-50 px-2.5 font-semibold"
+                          >
+                            Recusar / Ajuste
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleOpenDocReviewModal(doc, 'verified')}
+                            className="h-7 text-[10px] bg-emerald-700 hover:bg-emerald-800 text-white px-3 font-bold"
+                          >
+                            Aprovar
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* TAB 4: IMÓVEIS & PROPOSTAS */}
             <TabsContent value="imoveis" className="space-y-4 m-0">
               {/* Properties of Interest Section */}
               <div className="space-y-2">
@@ -529,6 +827,89 @@ export function ClientDetailDrawer({
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Review Document Modal Inside Drawer */}
+        <Dialog open={isReviewModalOpen} onOpenChange={setIsReviewModalOpen}>
+          <DialogContent className="max-w-md bg-white p-6">
+            <DialogHeader>
+              <DialogTitle className="text-base font-bold text-[#1A3636] flex items-center gap-2">
+                <FileCheck2 className="w-5 h-5 text-[#D4AF37]" />
+                {reviewAction === 'verified'
+                  ? 'Aprovar Documento do Cliente'
+                  : 'Solicitar Ajuste / Reenvio de Documento'}
+              </DialogTitle>
+              <DialogDescription className="text-xs text-gray-500">
+                Cliente: <strong>{client.name}</strong> • Documento:{' '}
+                <strong>{reviewingDoc?.type}</strong> (v{reviewingDoc?.version || 1})
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2 text-xs">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-gray-700">Decisão da Vera:</Label>
+                <Select
+                  value={reviewAction}
+                  onValueChange={(val) => setReviewAction(val as DocumentStatus)}
+                >
+                  <SelectTrigger className="text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="verified" className="text-emerald-700 font-bold">
+                      ✓ Aprovar Documento
+                    </SelectItem>
+                    <SelectItem value="rejected" className="text-red-700 font-bold">
+                      ✕ Recusar / Solicitar Novo Arquivo
+                    </SelectItem>
+                    <SelectItem value="pending" className="text-amber-700 font-bold">
+                      ⏳ Manter Em Análise
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-[#1A3636]">
+                  Observação da Vera para o Cliente (visível no portal):
+                </Label>
+                <Textarea
+                  rows={3}
+                  value={reviewNotes}
+                  onChange={(e) => setReviewNotes(e.target.value)}
+                  placeholder="Ex: Documento aprovado com sucesso / Por favor envie foto com todas as bordas visíveis..."
+                  className="text-xs"
+                />
+                <p className="text-[10px] text-gray-400">
+                  Esta mensagem aparece com destaque no cofre e na timeline do cliente.
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsReviewModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                disabled={isSubmittingReview}
+                onClick={handleConfirmDocReview}
+                className={`text-white text-xs font-bold ${
+                  reviewAction === 'verified'
+                    ? 'bg-emerald-700 hover:bg-emerald-800'
+                    : 'bg-red-700 hover:bg-red-800'
+                }`}
+              >
+                {isSubmittingReview ? 'Gravando...' : 'Confirmar Avaliação'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Drawer Footer Actions */}
         <SheetFooter className="p-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-2">

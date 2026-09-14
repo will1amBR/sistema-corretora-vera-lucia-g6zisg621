@@ -27,6 +27,8 @@ export interface StageDefinition {
   icon: React.ComponentType<{ className?: string }>
   clientTip: string
   estimatedDuration: string
+  remainingBusinessDays: number
+  whatHappensNow: string
 }
 
 export const NEGOTIATION_STAGES: StageDefinition[] = [
@@ -40,6 +42,9 @@ export const NEGOTIATION_STAGES: StageDefinition[] = [
     clientTip:
       'Você avaliou os detalhes construtivos, incidência solar e vizinhança em Porto Alegre.',
     estimatedDuration: 'Concluído',
+    remainingBusinessDays: 25,
+    whatHappensNow:
+      'A corretora estruturou as opções e você já pode formalizar sua proposta de compra.',
   },
   {
     key: 'proposta_enviada',
@@ -50,6 +55,9 @@ export const NEGOTIATION_STAGES: StageDefinition[] = [
     icon: FileText,
     clientTip: 'Aguarde a apresentação dos termos ao proprietário vendedor pela corretora.',
     estimatedDuration: '1 a 2 dias úteis',
+    remainingBusinessDays: 24,
+    whatHappensNow:
+      'A Vera Koren apresenta seus termos ao proprietário com argumentos de mercado para defender sua oferta.',
   },
   {
     key: 'proposta_em_analise',
@@ -62,6 +70,9 @@ export const NEGOTIATION_STAGES: StageDefinition[] = [
     clientTip:
       'Vera está negociando os melhores termos com foco em fechar o melhor negócio para você.',
     estimatedDuration: '24h a 48h',
+    remainingBusinessDays: 22,
+    whatHappensNow:
+      'Estamos alinhando o fechamento do preço e forma de pagamento com o proprietário vendedor.',
   },
   {
     key: 'proposta_aprovada',
@@ -72,6 +83,9 @@ export const NEGOTIATION_STAGES: StageDefinition[] = [
     icon: CheckCircle2,
     clientTip: 'Parabéns! O valor foi acordado. Agora precisamos enviar seus documentos.',
     estimatedDuration: 'Imediato',
+    remainingBusinessDays: 20,
+    whatHappensNow:
+      'O imóvel está reservado para você! Próximo passo: envio dos documentos no cofre digital.',
   },
   {
     key: 'documentacao',
@@ -82,7 +96,10 @@ export const NEGOTIATION_STAGES: StageDefinition[] = [
       'Conferência de documentos pessoais, certidões negativas e comprovantes pelo cofre seguro.',
     icon: FileCheck,
     clientTip: 'Tire fotos nítidas ou suba os PDFs pelo Cofre de Documentos abaixo.',
-    estimatedDuration: '2 a 5 dias',
+    estimatedDuration: '2 a 5 dias úteis',
+    remainingBusinessDays: 18,
+    whatHappensNow:
+      'Assim que você envia cada documento, a Vera confere a nitidez e submete ao correspondente bancário.',
   },
   {
     key: 'analise_credito',
@@ -94,6 +111,9 @@ export const NEGOTIATION_STAGES: StageDefinition[] = [
     icon: ShieldCheck,
     clientTip: 'Acompanhamos diretamente o correspondente bancário para agilizar o parecer.',
     estimatedDuration: '7 a 15 dias úteis',
+    remainingBusinessDays: 12,
+    whatHappensNow:
+      'O banco faz a vistoria técnica no imóvel e emite o parecer definitivo da aprovação do financiamento.',
   },
   {
     key: 'contrato_assinado',
@@ -104,7 +124,10 @@ export const NEGOTIATION_STAGES: StageDefinition[] = [
       'Assinatura do Compromisso de Compra e Venda / Contrato de Financiamento Bancário.',
     icon: PenTool,
     clientTip: 'Você assina o contrato e realizamos o pagamento da entrada e recolhimento de ITBI.',
-    estimatedDuration: '3 a 7 dias',
+    estimatedDuration: '3 a 7 dias úteis',
+    remainingBusinessDays: 5,
+    whatHappensNow:
+      'Revisão final da minuta jurídica e agendamento da assinatura oficial com as partes.',
   },
   {
     key: 'concluido',
@@ -115,9 +138,11 @@ export const NEGOTIATION_STAGES: StageDefinition[] = [
     icon: PartyPopper,
     clientTip: 'Momento de celebrar sua conquista com toda a segurança jurídica.',
     estimatedDuration: 'Conclusão',
+    remainingBusinessDays: 0,
+    whatHappensNow:
+      'A escritura é registrada e as chaves do seu novo lar em Porto Alegre são entregues!',
   },
 ]
-
 // Fallback logic to infer stage if proposal status is used
 export function inferStageFromProposal(
   proposalStatus?: ProposalStatus,
@@ -323,9 +348,9 @@ export function NegotiationTimeline({
           })}
         </div>
 
-        {/* Current Active Stage Focus Card */}
-        <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-r from-gray-50 via-amber-50/20 to-white border border-[#D4AF37]/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1">
+        {/* Current Active Stage Focus Card & What happens now */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-xl bg-gradient-to-r from-gray-50 via-amber-50/20 to-white border border-[#D4AF37]/50 space-y-2">
             <div className="flex items-center gap-2">
               <Badge className="bg-[#1A3636] text-[#D4AF37] text-[10px] font-bold">
                 Foco do Momento
@@ -335,17 +360,34 @@ export function NegotiationTimeline({
             <p className="text-xs text-gray-700 font-medium leading-relaxed">
               {currentStageObj.clientTip}
             </p>
-            <p className="text-[11px] text-gray-500">
-              Prazo estimado nesta etapa: <strong>{currentStageObj.estimatedDuration}</strong>
-              {lastUpdatedDate
-                ? ` • Atualizado em ${new Date(lastUpdatedDate).toLocaleDateString('pt-BR')}`
-                : ''}
-            </p>
+            <div className="text-[11px] text-gray-500 flex items-center gap-2 flex-wrap pt-1 border-t border-gray-200/60">
+              <span>
+                Prazo nesta etapa: <strong>{currentStageObj.estimatedDuration}</strong>
+              </span>
+              {currentStageObj.remainingBusinessDays > 0 ? (
+                <span className="text-emerald-800 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  Faltam ~{currentStageObj.remainingBusinessDays} dias úteis até a conclusão
+                </span>
+              ) : null}
+            </div>
           </div>
 
-          <div className="shrink-0 flex items-center gap-2 text-xs text-[#1A3636] font-semibold bg-white p-2.5 rounded-lg border border-gray-200">
-            <Info className="w-4 h-4 text-[#D4AF37]" />
-            <span>Suporte da Vera: (51) 99132-7636</span>
+          <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-50/50 to-white border border-emerald-200/70 space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-emerald-700 text-white text-[10px] font-bold">
+                O que acontece agora
+              </Badge>
+              <span className="text-xs font-bold text-[#1A3636]">Transparência Total</span>
+            </div>
+            <p className="text-xs text-gray-700 leading-relaxed">
+              {currentStageObj.whatHappensNow}
+            </p>
+            <div className="pt-1 flex items-center justify-between text-[11px] text-[#1A3636] font-semibold border-t border-emerald-100">
+              <span className="flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Acompanhado por Vera Koren
+              </span>
+              <span className="text-gray-500 font-mono">(51) 99132-7636</span>
+            </div>
           </div>
         </div>
       </CardContent>

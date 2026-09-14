@@ -43,8 +43,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { getDocuments, updateDocumentStatus, getDocumentDownloadUrl } from '@/services/documents'
+import {
+  getDocuments,
+  updateDocumentStatusWithHistory,
+  getDocumentDownloadUrl,
+} from '@/services/documents'
 import { Skeleton } from '@/components/ui/skeleton'
+import { formatRelativeTime } from '@/components/DocumentVault'
 import type { Proposal, ClientDocument, ProposalStatus, DocumentStatus } from '@/types'
 
 const PROPOSAL_STATUS_LABELS: Record<ProposalStatus, { label: string; color: string }> = {
@@ -70,6 +75,13 @@ export default function ProposalsManager() {
   const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null)
   const [newStatus, setNewStatus] = useState<ProposalStatus>('docs_pending')
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+
+  // Document Review Dialog for Vera with Observação
+  const [reviewingDoc, setReviewingDoc] = useState<ClientDocument | null>(null)
+  const [reviewAction, setReviewAction] = useState<DocumentStatus>('verified')
+  const [reviewNotes, setReviewNotes] = useState<string>('')
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false)
 
   // Counter Proposal Modal
   const [isCounterModalOpen, setIsCounterModalOpen] = useState(false)
@@ -197,19 +209,49 @@ export default function ProposalsManager() {
     }
   }
 
-  const handleVerifyDoc = async (docId: string, status: DocumentStatus) => {
+  const handleOpenDocReviewModal = (doc: ClientDocument, targetStatus: DocumentStatus) => {
+    setReviewingDoc(doc)
+    setReviewAction(targetStatus)
+    setReviewNotes(
+      doc.notes ||
+        (targetStatus === 'verified'
+          ? 'Documento perfeitamente legível e válido para tramitação.'
+          : 'Por favor reenviar com documento frente e verso nítidos.'),
+    )
+    setIsReviewModalOpen(true)
+  }
+
+  const handleConfirmDocReview = async () => {
+    if (!reviewingDoc) return
+    setIsSubmittingReview(true)
     try {
-      await updateDocumentStatus(docId, status)
-      toast({
-        title: status === 'verified' ? 'Documento Aprovado!' : 'Documento Reprovado',
+      await updateDocumentStatusWithHistory({
+        id: reviewingDoc.id,
+        status: reviewAction,
+        notes: reviewNotes,
+        actorName: 'Vera Lúcia Koren',
+        currentDoc: reviewingDoc,
       })
+      toast({
+        title:
+          reviewAction === 'verified'
+            ? '✓ Documento Aprovado com Sucesso!'
+            : '✕ Ajuste Solicitado ao Cliente',
+        description:
+          reviewAction === 'verified'
+            ? 'O status e a sua observação foram registrados no portal do cliente.'
+            : 'O cliente verá sua observação no portal para providenciar o reenvio.',
+      })
+      setIsReviewModalOpen(false)
       loadData()
     } catch (err: any) {
       toast({
-        title: 'Erro ao atualizar documento',
+        title: 'Erro ao salvar avaliação do documento',
         description: err.message,
         variant: 'destructive',
       })
+    } finally {
+      setIsSubmittingReview(false)
     }
   }
 
@@ -378,15 +420,23 @@ export default function ProposalsManager() {
                             {propDocs.map((doc) => (
                               <div
                                 key={doc.id}
-                                className="flex items-center justify-between p-2 rounded bg-white border border-gray-200"
+                                className="p-2.5 rounded-lg bg-white border border-gray-200 space-y-1.5"
                               >
-                                <div>
-                                  <span className="font-medium text-[#1A3636] block">
-                                    {doc.type || doc.title}
-                                  </span>
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-[#1A3636]">
+                                      {doc.type || doc.title}
+                                    </span>
+                                    {doc.version && doc.version > 1 && (
+                                      <Badge className="bg-[#1A3636] text-[#D4AF37] text-[9px] font-bold border-none">
+                                        v{doc.version}
+                                      </Badge>
+                                    )}
+                                  </div>
+
                                   <Badge
                                     variant="outline"
-                                    className={`text-[9px] ${
+                                    className={`text-[9px] font-bold ${
                                       doc.status === 'verified'
                                         ? 'text-emerald-700 bg-emerald-50 border-emerald-300'
                                         : doc.status === 'rejected'
@@ -394,32 +444,62 @@ export default function ProposalsManager() {
                                           : 'text-amber-700 bg-amber-50 border-amber-300'
                                     }`}
                                   >
-                                    {doc.status === 'verified' && 'Aprovado'}
-                                    {doc.status === 'rejected' && 'Reprovado'}
-                                    {doc.status === 'pending' && 'Pendente'}
+                                    {doc.status === 'verified' && '✓ Aprovado'}
+                                    {doc.status === 'rejected' && '✕ Recusado'}
+                                    {doc.status === 'pending' && '⏳ Em Análise'}
                                   </Badge>
                                 </div>
 
-                                <div className="flex items-center gap-1">
-                                  {doc.file && (
+                                <div className="flex items-center justify-between text-[10px] text-gray-500">
+                                  <span>
+                                    Enviado {formatRelativeTime(doc.updated || doc.created)}
+                                  </span>
+                                  {doc.reviewed_at && (
+                                    <span className="text-emerald-800 font-medium">
+                                      Avaliado em{' '}
+                                      {new Date(doc.reviewed_at).toLocaleDateString('pt-BR')}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {doc.notes && (
+                                  <div className="p-1.5 bg-gray-50 rounded border text-[10px] text-gray-700">
+                                    <strong>Obs da Vera:</strong> {doc.notes}
+                                  </div>
+                                )}
+
+                                <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+                                  {doc.file ? (
                                     <a
                                       href={getDocumentDownloadUrl(doc)}
                                       target="_blank"
                                       rel="noreferrer"
-                                      className="p-1 text-gray-600 hover:text-[#1A3636]"
-                                      title="Visualizar documento"
+                                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1A3636] hover:underline"
                                     >
-                                      <Download className="w-3.5 h-3.5" />
+                                      <Download className="w-3.5 h-3.5 text-[#D4AF37]" /> Abrir
+                                      Arquivo
                                     </a>
+                                  ) : (
+                                    <span className="text-[10px] text-gray-400">Sem anexo</span>
                                   )}
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => handleVerifyDoc(doc.id, 'verified')}
-                                    className="h-6 text-[10px] text-emerald-700 hover:bg-emerald-50 px-1.5"
-                                  >
-                                    Aprovar
-                                  </Button>
+
+                                  <div className="flex items-center gap-1">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleOpenDocReviewModal(doc, 'rejected')}
+                                      className="h-6 text-[10px] text-red-700 border-red-200 hover:bg-red-50 px-2"
+                                    >
+                                      Recusar / Ajuste
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleOpenDocReviewModal(doc, 'verified')}
+                                      className="h-6 text-[10px] bg-emerald-700 hover:bg-emerald-800 text-white px-2 font-bold"
+                                    >
+                                      Aprovar
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
                             ))}
@@ -625,6 +705,88 @@ export default function ProposalsManager() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Review Document Modal with Observação (Vera pode aprovar ou recusar com recado que aparece para o cliente) */}
+      <Dialog open={isReviewModalOpen} onOpenChange={setIsReviewModalOpen}>
+        <DialogContent className="max-w-md bg-white p-6">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-[#1A3636] flex items-center gap-2">
+              <FileCheck2 className="w-5 h-5 text-[#D4AF37]" />
+              {reviewAction === 'verified'
+                ? 'Aprovar Documento do Cliente'
+                : 'Solicitar Correção / Reenvio'}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-gray-500">
+              Documento: <strong>{reviewingDoc?.type}</strong> (v{reviewingDoc?.version || 1})
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2 text-xs">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-gray-700">Decisão da Corretora</Label>
+              <Select
+                value={reviewAction}
+                onValueChange={(val) => setReviewAction(val as DocumentStatus)}
+              >
+                <SelectTrigger className="text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="verified" className="text-emerald-700 font-bold">
+                    ✓ Aprovar Documento
+                  </SelectItem>
+                  <SelectItem value="rejected" className="text-red-700 font-bold">
+                    ✕ Recusar / Solicitar Nova Versão
+                  </SelectItem>
+                  <SelectItem value="pending" className="text-amber-700 font-bold">
+                    ⏳ Manter Em Análise
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-[#1A3636]">
+                Observação da Vera (Visível para o cliente no portal):
+              </Label>
+              <Textarea
+                rows={3}
+                value={reviewNotes}
+                onChange={(e) => setReviewNotes(e.target.value)}
+                placeholder="Ex: Documento aprovado com sucesso / Por favor envie foto com bordas visíveis..."
+                className="text-xs"
+              />
+              <p className="text-[10px] text-gray-400">
+                Esta observação ficará registrada no histórico do cofre do cliente.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsReviewModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              disabled={isSubmittingReview}
+              onClick={handleConfirmDocReview}
+              className={`text-white text-xs font-bold ${
+                reviewAction === 'verified'
+                  ? 'bg-emerald-700 hover:bg-emerald-800'
+                  : 'bg-red-700 hover:bg-red-800'
+              }`}
+            >
+              {isSubmittingReview ? 'Gravando...' : 'Confirmar Avaliação'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

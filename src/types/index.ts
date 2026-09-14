@@ -192,6 +192,33 @@ export interface AppNotification {
 
 export type DocumentStatus = 'pending' | 'verified' | 'rejected'
 
+export interface DocumentHistoryEntry {
+  action: 'uploaded' | 'resubmitted' | 'approved' | 'rejected' | 'commented' | 'deleted'
+  actor_name?: string
+  actor_role?: 'client' | 'broker' | 'system'
+  version?: number
+  date: string
+  note?: string
+  metadata?: Record<string, any>
+}
+
+export interface DocumentEvent {
+  id: string
+  document_id?: string
+  client_id: string
+  proposal_id?: string
+  document_type: string
+  document_title?: string
+  action: 'uploaded' | 'resubmitted' | 'approved' | 'rejected' | 'commented' | 'deleted'
+  actor_name?: string
+  actor_role?: 'client' | 'broker' | 'system'
+  note?: string
+  version?: number
+  metadata?: Record<string, any>
+  created: string
+  updated: string
+}
+
 export interface ClientDocument {
   id: string
   client_id?: string
@@ -201,6 +228,10 @@ export interface ClientDocument {
   file: string
   status: DocumentStatus
   notes?: string
+  version?: number
+  history?: DocumentHistoryEntry[]
+  reviewed_at?: string
+  reviewed_by?: string
   created: string
   updated: string
 }

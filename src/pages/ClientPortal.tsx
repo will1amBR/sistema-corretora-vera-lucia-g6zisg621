@@ -41,10 +41,14 @@ import { getProposalsByClientId, acceptCounterProposal } from '@/services/propos
 import { getDocumentsByClientId } from '@/services/documents'
 import { getProperties } from '@/services/properties'
 import { ClientOnboardingModal } from '@/components/ClientOnboardingModal'
-import { NegotiationTimeline } from '@/components/NegotiationTimeline'
+import {
+  NegotiationTimeline,
+  NEGOTIATION_STAGES,
+  inferStageFromProposal,
+} from '@/components/NegotiationTimeline'
 import { FinancingSimulator } from '@/components/FinancingSimulator'
 import { ClientProposalForm } from '@/components/ClientProposalForm'
-import { DocumentVault } from '@/components/DocumentVault'
+import { DocumentVault, CHECKLIST_BY_MODALITY } from '@/components/DocumentVault'
 import { BROKER_PHONE_DISPLAY, getWhatsAppUrl } from '@/components/FloatingWhatsApp'
 import type { Client, Proposal, ClientDocument, Property } from '@/types'
 
@@ -279,56 +283,88 @@ export default function ClientPortal() {
 
   const fb = client?.financial_breakdown
 
-  // Compute expected next action
+  // Compute stages, remaining days and document status
+  const currentStageKey = inferStageFromProposal(
+    activeProposal?.status,
+    activeProposal?.negotiation_stage,
+  )
+  const currentStageObj =
+    NEGOTIATION_STAGES.find((s) => s.key === currentStageKey) || NEGOTIATION_STAGES[0]
+  const currentOrder = currentStageObj.order
+  const overallNegotiationProgress = Math.round((currentOrder / NEGOTIATION_STAGES.length) * 100)
+
+  const activeModality = client?.purchase_modality || 'financiamento'
+  const relevantChecklist = CHECKLIST_BY_MODALITY.filter((item) =>
+    item.requiredFor.includes(activeModality),
+  )
+  const totalRequiredDocs = relevantChecklist.length
+  const uploadedDocsCount = relevantChecklist.filter((req) =>
+    documents.some((d) => d.type === req.type),
+  ).length
+  const missingDocsCount = Math.max(0, totalRequiredDocs - uploadedDocsCount)
+
+  // Compute expected next action with realistic days and clear CTA
   const getNextAction = () => {
     if (!activeProposal) {
       return {
-        title: 'Enviar Proposta Comercial',
-        desc: 'Simule as parcelas e envie formalmente seus termos de compra para análise da proprietária.',
+        title: 'Enviar Proposta Comercial Formal',
+        desc: 'Simule as parcelas e envie formalmente seus termos de compra para análise do vendedor.',
         tab: 'proposal' as const,
         btnText: 'Montar Minha Proposta',
-      }
-    }
-    if (
-      activeProposal.status === 'docs_pending' ||
-      activeProposal.negotiation_stage === 'documentacao'
-    ) {
-      return {
-        title: 'Enviar Documentos Pessoais e Renda',
-        desc: 'Seu cofre de documentos está aguardando o upload do RG, comprovante de renda e residência.',
-        tab: 'documents' as const,
-        btnText: 'Abrir Cofre de Documentos',
-      }
-    }
-    if (activeProposal.status === 'under_review') {
-      return {
-        title: 'Documentos em Análise Bancária',
-        desc: 'Aguarde a emissão do parecer da engenharia e validação do banco escolhido.',
-        tab: 'overview' as const,
-        btnText: 'Ver Linha do Tempo',
+        badge: 'Ação do Comprador',
+        urgency: 'high',
       }
     }
     if (activeProposal.status === 'counter_sent') {
       return {
         title: 'Contraproposta Recebida da Vera Lúcia!',
-        desc: 'Vera analisou sua proposta com o proprietário e enviou uma contraproposta comercial. Avalie as novas condições.',
+        desc: 'Vera alinhou novas condições com o proprietário vendedor. Avalie os termos e decida o fechamento.',
         tab: 'overview' as const,
-        btnText: 'Analisar Contraproposta',
+        btnText: 'Avaliar Contraproposta',
+        badge: 'Decisão Pendente',
+        urgency: 'urgent',
+      }
+    }
+    if (missingDocsCount > 0) {
+      return {
+        title: `Falta enviar ${missingDocsCount} ${missingDocsCount === 1 ? 'documento' : 'documentos'}`,
+        desc: `Para avançar na aprovação bancária e minuta jurídica, envie os documentos restantes no cofre seguro.`,
+        tab: 'documents' as const,
+        btnText: 'Completar Envio de Documentos',
+        badge: `${uploadedDocsCount}/${totalRequiredDocs} Enviados`,
+        urgency: 'medium',
+      }
+    }
+    if (
+      activeProposal.status === 'under_review' ||
+      activeProposal.negotiation_stage === 'analise_credito'
+    ) {
+      return {
+        title: 'Documentos em Análise Bancária / Engenharia',
+        desc: 'Seus documentos estão em validação técnica. Faltam ~12 a 15 dias úteis para emissão do laudo de avaliação.',
+        tab: 'overview' as const,
+        btnText: 'Ver Linha do Tempo',
+        badge: 'Em Análise',
+        urgency: 'low',
       }
     }
     if (activeProposal.status === 'accepted') {
       return {
         title: 'Proposta Aprovada! Próximo: Minuta e Assinatura',
-        desc: 'Vera Koren está preparando a minuta do compromisso de compra e venda.',
+        desc: 'Vera Koren está preparando a minuta oficial do compromisso de compra e venda.',
         tab: 'overview' as const,
-        btnText: 'Falar com a Vera',
+        btnText: 'Acompanhar Minuta',
+        badge: 'Fase Final',
+        urgency: 'low',
       }
     }
     return {
       title: 'Acompanhar Linha do Tempo',
-      desc: 'Sua negociação está em andamento. Veja o status das etapas abaixo.',
+      desc: 'Sua negociação está evoluindo de forma segura e transparente. Acompanhe cada etapa abaixo.',
       tab: 'overview' as const,
-      btnText: 'Ver Status',
+      btnText: 'Ver Andamento',
+      badge: currentStageObj.shortTitle,
+      urgency: 'low',
     }
   }
 
@@ -336,140 +372,240 @@ export default function ClientPortal() {
 
   return (
     <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-16 px-3 sm:px-4">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-[#1A3636] via-[#244848] to-[#142A2A] text-white p-6 rounded-2xl shadow-lg border border-[#D4AF37]/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-[#D4AF37]/10 to-transparent pointer-events-none" />
+      {/* 1. RESUMO HERO NO TOPO (Reduzir Ansiedade da Compra) */}
+      <div className="bg-gradient-to-br from-[#1A3636] via-[#214343] to-[#122424] text-white p-6 sm:p-7 rounded-2xl shadow-xl border border-[#D4AF37]/40 relative overflow-hidden">
+        {/* Subtle decorative glow */}
+        <div className="absolute right-0 top-0 bottom-0 w-2/5 bg-gradient-to-l from-[#D4AF37]/15 to-transparent pointer-events-none" />
 
-        <div className="relative z-10">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-6 bg-[#D4AF37] rounded-sm" />
-            <h1 className="text-xl sm:text-2xl font-bold tracking-wide">
-              Área do Cliente • {client?.name}
-            </h1>
+        <div className="relative z-10 space-y-5">
+          {/* Top Line: Client Name + Foxter Badge */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-6 bg-[#D4AF37] rounded-sm" />
+                <h1 className="text-xl sm:text-2xl font-bold tracking-wide">
+                  Área do Cliente • {client?.name}
+                </h1>
+              </div>
+              <p className="text-xs text-white/80">
+                Imóvel em Negociação:{' '}
+                <strong className="text-[#D4AF37]">
+                  {interestedProperty?.title || 'Imóvel Selecionado'}
+                </strong>{' '}
+                • {interestedProperty?.neighborhood || 'Porto Alegre - RS'}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setClientTourOpen(true)}
+                className="border-[#D4AF37]/70 text-[#D4AF37] hover:bg-white/10 text-xs font-semibold gap-1.5 shadow-xs"
+              >
+                <Compass className="w-3.5 h-3.5" /> Como Funciona o Portal
+              </Button>
+              <Badge className="bg-[#D4AF37] text-[#1A3636] font-bold text-xs py-1.5 px-3 border-none">
+                Foxter Imobiliária • Vera Koren
+              </Badge>
+            </div>
           </div>
-          <p className="text-xs sm:text-sm text-white/80 mt-1 max-w-2xl leading-relaxed">
-            Painel exclusivo de negociação imobiliária em Porto Alegre. Faça propostas, envie
-            documentos no cofre seguro e simule condições de financiamento bancário em tempo real.
-          </p>
-        </div>
 
-        <div className="relative z-10 flex items-center gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setClientTourOpen(true)}
-            className="border-[#D4AF37]/70 text-[#D4AF37] hover:bg-white/10 text-xs font-semibold gap-1.5 shadow-xs"
-          >
-            <Compass className="w-3.5 h-3.5" /> Como Funciona o Portal
-          </Button>
-          <Badge className="bg-[#D4AF37] text-[#1A3636] font-bold text-xs py-1.5 px-3 border-none">
-            Foxter Imobiliária • Vera Koren
-          </Badge>
+          {/* Hero Core: Indicador de Progresso Geral & Estimativa de Prazo */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            {/* Box 1: Progresso Geral X% Concluído */}
+            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-white/80 font-semibold">Progresso da Negociação</span>
+                <span className="font-extrabold text-base text-[#D4AF37]">
+                  {overallNegotiationProgress}%
+                </span>
+              </div>
+              <div className="w-full bg-white/20 h-2.5 rounded-full overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-[#D4AF37] to-amber-300 h-full rounded-full transition-all duration-700"
+                  style={{ width: `${overallNegotiationProgress}%` }}
+                />
+              </div>
+              <span className="text-[11px] text-white/70 block">
+                Etapa {currentOrder} de {NEGOTIATION_STAGES.length}:{' '}
+                <strong className="text-white">{currentStageObj.shortTitle}</strong>
+              </span>
+            </div>
+
+            {/* Box 2: Estimativa Realista de Prazo Restante */}
+            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15 space-y-1">
+              <span className="text-[11px] uppercase font-bold text-[#D4AF37] tracking-wider block">
+                Estimativa de Prazos
+              </span>
+              <div className="text-base sm:text-lg font-extrabold text-white flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-[#D4AF37]" />
+                {currentStageObj.remainingBusinessDays > 0 ? (
+                  <span>Faltam ~{currentStageObj.remainingBusinessDays} dias úteis</span>
+                ) : (
+                  <span>Etapa Concluída</span>
+                )}
+              </div>
+              <p className="text-[11px] text-white/80 leading-snug">
+                {currentStageObj.key === 'documentacao' &&
+                  'Baseado na conferência dos documentos e submissão ao banco parceiro.'}
+                {currentStageObj.key === 'analise_credito' &&
+                  'Prazo para vistoria técnica da engenharia e parecer final de crédito.'}
+                {currentStageObj.key !== 'documentacao' &&
+                  currentStageObj.key !== 'analise_credito' &&
+                  `Duração estimada desta fase: ${currentStageObj.estimatedDuration}.`}
+              </p>
+            </div>
+
+            {/* Box 3: PRÓXIMA AÇÃO CLARA (Zero Dúvida) */}
+            <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/20 to-white/10 backdrop-blur-xs border border-[#D4AF37]/50 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] uppercase font-bold text-[#D4AF37] tracking-wider flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5" /> Próxima Ação Necessária
+                </span>
+                <Badge className="bg-[#D4AF37] text-[#1A3636] text-[9px] font-bold">
+                  {nextAction.badge}
+                </Badge>
+              </div>
+              <h4 className="font-bold text-sm text-white leading-tight">{nextAction.title}</h4>
+              <Button
+                size="sm"
+                onClick={() => setActiveTab(nextAction.tab)}
+                className="w-full bg-[#D4AF37] hover:bg-[#b89528] text-[#1A3636] font-bold text-xs h-8 gap-1.5 shadow-md"
+              >
+                <span>{nextAction.btnText}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Top Quick Status & Next Action Executive Summary Card */}
+      {/* Cards de Acolhimento, Mensagem da Vera e Seção "O que acontece agora" */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Card 1: Imóvel em Negociação */}
-        <Card className="card-elevated border-l-4 border-l-[#1A3636] flex flex-col justify-between">
-          <CardHeader className="p-4 pb-2">
-            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-              Imóvel de Interesse
-            </span>
-            <CardTitle className="text-sm font-bold text-[#1A3636] flex items-center gap-1.5 leading-snug">
-              <Building2 className="w-4 h-4 text-[#D4AF37] shrink-0" />
-              {interestedProperty?.title || 'Imóvel em Negociação'}
-            </CardTitle>
-            <CardDescription className="text-xs text-gray-500">
-              {interestedProperty?.neighborhood} • Porto Alegre - RS
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="p-4 pt-1 space-y-2 text-xs">
-            <div className="flex justify-between items-center p-2.5 bg-gray-50 rounded-lg border border-gray-100">
-              <span className="text-gray-500">Valor de Avaliação:</span>
-              <strong className="text-sm text-[#1A3636]">
-                R$ {interestedProperty?.price?.toLocaleString('pt-BR')}
-              </strong>
-            </div>
-            <div className="flex justify-between text-[11px] text-gray-500">
-              <span>Modalidade Pretendida:</span>
-              <strong className="text-gray-800 capitalize">
-                {(client?.purchase_modality || 'financiamento').replace('_', ' ')}
-              </strong>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Card 2: Próxima Ação Esperada */}
-        <Card className="card-elevated border-l-4 border-l-[#D4AF37] flex flex-col justify-between bg-gradient-to-br from-amber-50/20 to-white">
-          <CardHeader className="p-4 pb-2">
-            <span className="text-[10px] uppercase font-bold text-[#D4AF37] tracking-wider">
-              Próximo Passo Recomendado
-            </span>
-            <CardTitle className="text-sm font-bold text-[#1A3636] flex items-center gap-1.5 leading-snug">
-              <Sparkles className="w-4 h-4 text-[#D4AF37] shrink-0" />
-              {nextAction.title}
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className="p-4 pt-1 space-y-3 text-xs">
-            <p className="text-gray-600 leading-snug text-[11px]">{nextAction.desc}</p>
-            <Button
-              size="sm"
-              onClick={() => setActiveTab(nextAction.tab)}
-              className="w-full bg-[#1A3636] hover:bg-[#254d4d] text-white text-xs font-bold gap-1 h-8"
-            >
-              <span>{nextAction.btnText}</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#D4AF37]" />
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Card 3: Vera Koren Broker Direct Contact & Recado */}
-        <Card className="card-elevated border-l-4 border-l-emerald-600 flex flex-col justify-between">
+        {/* Card 1: Mensagem Acolhedora da Vera (Reduzir Ansiedade) */}
+        <Card className="card-elevated border-l-4 border-l-[#1A3636] flex flex-col justify-between bg-gradient-to-br from-white to-gray-50">
           <CardHeader className="p-4 pb-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-                Corretora Especialista
+              <span className="text-[10px] uppercase font-bold text-[#1A3636] tracking-wider flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Atendimento Exclusivo
               </span>
               <Badge className="bg-emerald-100 text-emerald-800 text-[9px] font-bold">Online</Badge>
             </div>
             <CardTitle className="text-sm font-bold text-[#1A3636] flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              Vera Lúcia Koren
+              Corretora Vera Lúcia Koren
             </CardTitle>
             <CardDescription className="text-xs text-gray-500">
-              CRECI 38415 • Foxter Imobiliária
+              CRECI 38415 • Foxter Imobiliária Porto Alegre
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="p-4 pt-1 space-y-3 text-xs">
+            {client?.broker_message ? (
+              <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl text-[11px] text-gray-800 shadow-2xs">
+                <span className="font-bold text-[#1A3636] block mb-1">
+                  Mensagem Pessoal da Vera:
+                </span>
+                <p className="italic leading-relaxed">"{client.broker_message}"</p>
+              </div>
+            ) : (
+              <div className="p-3 bg-emerald-50/40 border border-emerald-200/60 rounded-xl text-[11px] text-gray-700 leading-relaxed italic shadow-2xs">
+                "Estou acompanhando cada detalhe da sua negociação para garantir que você tenha a
+                máxima tranquilidade, segurança jurídica e a menor taxa de financiamento."
+              </div>
+            )}
+
+            <div className="flex items-center justify-between pt-1">
+              <a
+                href={getWhatsAppUrl(
+                  `Olá Vera, estou no meu Portal do Cliente acompanhando o imóvel ${interestedProperty?.title || ''} e gostaria de bater um papo rápido!`,
+                )}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-900 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-300 shadow-2xs"
+              >
+                <Phone className="w-3.5 h-3.5 text-emerald-600" /> WhatsApp Direto
+              </a>
+              <span className="text-[11px] text-gray-500 font-mono font-medium">
+                {BROKER_PHONE_DISPLAY}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Card 2: Seção "O que acontece agora" */}
+        <Card className="card-elevated border-l-4 border-l-[#D4AF37] flex flex-col justify-between bg-gradient-to-br from-amber-50/20 to-white">
+          <CardHeader className="p-4 pb-2">
+            <span className="text-[10px] uppercase font-bold text-[#D4AF37] tracking-wider flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5" /> Transparência do Processo
+            </span>
+            <CardTitle className="text-sm font-bold text-[#1A3636] leading-snug">
+              O Que Acontece Agora?
+            </CardTitle>
+            <CardDescription className="text-xs text-gray-500">
+              Etapa atual: <strong>{currentStageObj.title}</strong>
             </CardDescription>
           </CardHeader>
 
           <CardContent className="p-4 pt-1 space-y-2 text-xs">
-            {client?.broker_message ? (
-              <div className="p-2.5 bg-amber-50/70 border border-amber-200/60 rounded-lg text-[11px] text-gray-700">
-                <span className="font-bold text-[#1A3636] block mb-0.5">Recado da Vera:</span>"
-                {client.broker_message}"
-              </div>
-            ) : (
-              <p className="text-[11px] text-gray-500 italic">
-                "Estou à disposição para negociar as melhores condições de preço e conduzir a
-                análise de crédito do seu novo imóvel."
-              </p>
-            )}
-
-            <div className="pt-1 flex items-center justify-between">
-              <a
-                href={getWhatsAppUrl(
-                  `Olá Vera, estou no meu Portal do Cliente referente ao imóvel ${interestedProperty?.title || ''} e gostaria de tirar uma dúvida!`,
-                )}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200"
+            <p className="text-gray-700 leading-relaxed text-[11px] bg-white p-3 rounded-lg border border-gray-100 shadow-2xs">
+              {currentStageObj.whatHappensNow}
+            </p>
+            <div className="pt-1 flex items-center justify-between text-[10px] text-gray-500">
+              <span>Duração esperada: {currentStageObj.estimatedDuration}</span>
+              <button
+                type="button"
+                onClick={() => setActiveTab('overview')}
+                className="font-bold text-[#1A3636] hover:underline flex items-center gap-0.5"
               >
-                <Phone className="w-3.5 h-3.5" /> Falar no WhatsApp
-              </a>
-              <span className="text-[11px] text-gray-400 font-mono">{BROKER_PHONE_DISPLAY}</span>
+                Ver 8 etapas <ChevronRight className="w-3 h-3 text-[#D4AF37]" />
+              </button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Card 3: Status dos Documentos com Acesso Rápido */}
+        <Card className="card-elevated border-l-4 border-l-teal-600 flex flex-col justify-between">
+          <CardHeader className="p-4 pb-2">
+            <span className="text-[10px] uppercase font-bold text-teal-700 tracking-wider flex items-center gap-1">
+              <FileText className="w-3.5 h-3.5 text-teal-600" /> Cofre de Documentos
+            </span>
+            <CardTitle className="text-sm font-bold text-[#1A3636]">
+              {uploadedDocsCount} de {totalRequiredDocs} Enviados
+            </CardTitle>
+            <CardDescription className="text-xs text-gray-500">
+              {missingDocsCount === 0
+                ? 'Todos os documentos foram enviados!'
+                : `Faltam ${missingDocsCount} itens para aprovação completa.`}
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="p-4 pt-1 space-y-3 text-xs">
+            <div className="space-y-1">
+              <div className="flex justify-between text-[11px] text-gray-500">
+                <span>Conclusão:</span>
+                <span className="font-bold text-[#1A3636]">
+                  {Math.round((uploadedDocsCount / Math.max(1, totalRequiredDocs)) * 100)}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                <div
+                  className="bg-teal-600 h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.round((uploadedDocsCount / Math.max(1, totalRequiredDocs)) * 100)}%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            <Button
+              size="sm"
+              onClick={() => setActiveTab('documents')}
+              className="w-full bg-[#1A3636] hover:bg-[#254d4d] text-white text-xs font-bold gap-1 h-8"
+            >
+              <UploadCloud className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>{missingDocsCount > 0 ? 'Enviar Documentos Faltantes' : 'Acessar Cofre'}</span>
+            </Button>
           </CardContent>
         </Card>
       </div>
