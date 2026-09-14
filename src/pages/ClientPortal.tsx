@@ -380,14 +380,14 @@ export default function ClientPortal() {
         <div className="relative z-10 space-y-5">
           {/* Top Line: Client Name + Foxter Badge */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-6 bg-[#D4AF37] rounded-sm" />
-                <h1 className="text-xl sm:text-2xl font-bold tracking-wide">
+            <div className="space-y-1 min-w-0 max-w-full">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-2.5 h-6 bg-[#D4AF37] rounded-sm shrink-0" />
+                <h1 className="text-xl sm:text-2xl font-bold tracking-wide break-words">
                   Área do Cliente • {client?.name}
                 </h1>
               </div>
-              <p className="text-xs text-white/80">
+              <p className="text-xs text-white/80 break-words">
                 Imóvel em Negociação:{' '}
                 <strong className="text-[#D4AF37]">
                   {interestedProperty?.title || 'Imóvel Selecionado'}
@@ -396,16 +396,16 @@ export default function ClientPortal() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap shrink-0 max-w-full">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setClientTourOpen(true)}
-                className="border-[#D4AF37]/70 text-[#D4AF37] hover:bg-white/10 text-xs font-semibold gap-1.5 shadow-xs"
+                className="border-[#D4AF37]/70 text-[#D4AF37] hover:bg-white/10 text-xs font-semibold gap-1.5 shadow-xs whitespace-normal sm:whitespace-nowrap h-auto py-1.5"
               >
-                <Compass className="w-3.5 h-3.5" /> Como Funciona o Portal
+                <Compass className="w-3.5 h-3.5 shrink-0" /> <span>Como Funciona o Portal</span>
               </Button>
-              <Badge className="bg-[#D4AF37] text-[#1A3636] font-bold text-xs py-1.5 px-3 border-none">
+              <Badge className="bg-[#D4AF37] text-[#1A3636] font-bold text-xs py-1.5 px-3 border-none whitespace-normal text-center">
                 Foxter Imobiliária • Vera Koren
               </Badge>
             </div>
@@ -414,39 +414,43 @@ export default function ClientPortal() {
           {/* Hero Core: Indicador de Progresso Geral & Estimativa de Prazo */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
             {/* Box 1: Progresso Geral X% Concluído */}
-            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15 space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-white/80 font-semibold">Progresso da Negociação</span>
-                <span className="font-extrabold text-base text-[#D4AF37]">
-                  {overallNegotiationProgress}%
-                </span>
+            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15 flex flex-col justify-between gap-2 min-w-0">
+              <div className="space-y-2 min-w-0">
+                <div className="flex items-center justify-between text-xs gap-2">
+                  <span className="text-white/80 font-semibold truncate">
+                    Progresso da Negociação
+                  </span>
+                  <span className="font-extrabold text-base text-[#D4AF37] shrink-0">
+                    {overallNegotiationProgress}%
+                  </span>
+                </div>
+                <div className="w-full bg-white/20 h-2.5 rounded-full overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-[#D4AF37] to-amber-300 h-full rounded-full transition-all duration-700"
+                    style={{ width: `${overallNegotiationProgress}%` }}
+                  />
+                </div>
               </div>
-              <div className="w-full bg-white/20 h-2.5 rounded-full overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-[#D4AF37] to-amber-300 h-full rounded-full transition-all duration-700"
-                  style={{ width: `${overallNegotiationProgress}%` }}
-                />
-              </div>
-              <span className="text-[11px] text-white/70 block">
+              <span className="text-[11px] text-white/70 block break-words">
                 Etapa {currentOrder} de {NEGOTIATION_STAGES.length}:{' '}
                 <strong className="text-white">{currentStageObj.shortTitle}</strong>
               </span>
             </div>
 
             {/* Box 2: Estimativa Realista de Prazo Restante */}
-            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15 space-y-1">
+            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15 flex flex-col justify-between gap-1.5 min-w-0">
               <span className="text-[11px] uppercase font-bold text-[#D4AF37] tracking-wider block">
                 Estimativa de Prazos
               </span>
-              <div className="text-base sm:text-lg font-extrabold text-white flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-[#D4AF37]" />
+              <div className="text-base sm:text-lg font-extrabold text-white flex items-center gap-1.5 flex-wrap">
+                <Clock className="w-4 h-4 text-[#D4AF37] shrink-0" />
                 {currentStageObj.remainingBusinessDays > 0 ? (
                   <span>Faltam ~{currentStageObj.remainingBusinessDays} dias úteis</span>
                 ) : (
                   <span>Etapa Concluída</span>
                 )}
               </div>
-              <p className="text-[11px] text-white/80 leading-snug">
+              <p className="text-[11px] text-white/80 leading-snug break-words">
                 {currentStageObj.key === 'documentacao' &&
                   'Baseado na conferência dos documentos e submissão ao banco parceiro.'}
                 {currentStageObj.key === 'analise_credito' &&
@@ -458,23 +462,28 @@ export default function ClientPortal() {
             </div>
 
             {/* Box 3: PRÓXIMA AÇÃO CLARA (Zero Dúvida) */}
-            <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/20 to-white/10 backdrop-blur-xs border border-[#D4AF37]/50 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] uppercase font-bold text-[#D4AF37] tracking-wider flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5" /> Próxima Ação Necessária
-                </span>
-                <Badge className="bg-[#D4AF37] text-[#1A3636] text-[9px] font-bold">
-                  {nextAction.badge}
-                </Badge>
+            <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/20 to-white/10 backdrop-blur-xs border border-[#D4AF37]/50 flex flex-col justify-between gap-3 min-w-0">
+              <div className="space-y-1.5 min-w-0">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="text-[11px] uppercase font-bold text-[#D4AF37] tracking-wider flex items-center gap-1 min-w-0">
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">Próxima Ação Necessária</span>
+                  </span>
+                  <Badge className="bg-[#D4AF37] text-[#1A3636] text-[10px] font-bold shrink-0 max-w-full whitespace-nowrap">
+                    {nextAction.badge}
+                  </Badge>
+                </div>
+                <h4 className="font-bold text-sm text-white leading-snug break-words">
+                  {nextAction.title}
+                </h4>
               </div>
-              <h4 className="font-bold text-sm text-white leading-tight">{nextAction.title}</h4>
               <Button
                 size="sm"
                 onClick={() => setActiveTab(nextAction.tab)}
-                className="w-full bg-[#D4AF37] hover:bg-[#b89528] text-[#1A3636] font-bold text-xs h-8 gap-1.5 shadow-md"
+                className="w-full bg-[#D4AF37] hover:bg-[#b89528] text-[#1A3636] font-bold text-xs min-h-[36px] h-auto py-2 px-3 gap-1.5 shadow-md justify-between items-center whitespace-normal text-left"
               >
-                <span>{nextAction.btnText}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <span className="line-clamp-2 leading-tight flex-1 mr-1">{nextAction.btnText}</span>
+                <ArrowRight className="w-3.5 h-3.5 shrink-0" />
               </Button>
             </div>
           </div>
@@ -515,18 +524,19 @@ export default function ClientPortal() {
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
               <a
                 href={getWhatsAppUrl(
                   `Olá Vera, estou no meu Portal do Cliente acompanhando o imóvel ${interestedProperty?.title || ''} e gostaria de bater um papo rápido!`,
                 )}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-900 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-300 shadow-2xs"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-900 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-300 shadow-2xs shrink-0"
               >
-                <Phone className="w-3.5 h-3.5 text-emerald-600" /> WhatsApp Direto
+                <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />{' '}
+                <span>WhatsApp Direto</span>
               </a>
-              <span className="text-[11px] text-gray-500 font-mono font-medium">
+              <span className="text-[11px] text-gray-500 font-mono font-medium truncate">
                 {BROKER_PHONE_DISPLAY}
               </span>
             </div>
@@ -614,39 +624,42 @@ export default function ClientPortal() {
       <Tabs
         value={activeTab}
         onValueChange={(val) => setActiveTab(val as any)}
-        className="w-full space-y-6"
+        className="w-full space-y-6 min-w-0"
       >
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-gray-100 p-1.5 rounded-xl h-auto">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1 bg-gray-100 p-1.5 rounded-xl h-auto">
           <TabsTrigger
             value="overview"
-            className="text-xs py-2.5 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm"
+            className="text-xs py-2.5 px-2 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-center whitespace-normal"
           >
-            <Clock className="w-3.5 h-3.5 mr-1.5 text-[#D4AF37]" />
-            Status da Negociação
+            <Clock className="w-3.5 h-3.5 shrink-0 text-[#D4AF37]" />
+            <span className="truncate">Status</span>
+            <span className="hidden sm:inline">da Negociação</span>
           </TabsTrigger>
 
           <TabsTrigger
             value="proposal"
-            className="text-xs py-2.5 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm"
+            className="text-xs py-2.5 px-2 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-center whitespace-normal"
           >
-            <FileText className="w-3.5 h-3.5 mr-1.5 text-[#D4AF37]" />
-            Minha Proposta
+            <FileText className="w-3.5 h-3.5 shrink-0 text-[#D4AF37]" />
+            <span className="truncate">Minha Proposta</span>
           </TabsTrigger>
 
           <TabsTrigger
             value="documents"
-            className="text-xs py-2.5 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm"
+            className="text-xs py-2.5 px-2 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-center whitespace-normal"
           >
-            <UploadCloud className="w-3.5 h-3.5 mr-1.5 text-[#D4AF37]" />
-            Cofre de Documentos
+            <UploadCloud className="w-3.5 h-3.5 shrink-0 text-[#D4AF37]" />
+            <span className="truncate">Cofre</span>
+            <span className="hidden sm:inline">de Documentos</span>
           </TabsTrigger>
 
           <TabsTrigger
             value="simulator"
-            className="text-xs py-2.5 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm"
+            className="text-xs py-2.5 px-2 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-center whitespace-normal"
           >
-            <Calculator className="w-3.5 h-3.5 mr-1.5 text-[#D4AF37]" />
-            Simulador de Financiamento
+            <Calculator className="w-3.5 h-3.5 shrink-0 text-[#D4AF37]" />
+            <span className="truncate">Simulador</span>
+            <span className="hidden sm:inline">de Financiamento</span>
           </TabsTrigger>
         </TabsList>
 
@@ -667,27 +680,26 @@ export default function ClientPortal() {
           {activeProposal && activeProposal.counter_offer && (
             <Card className="card-elevated border-2 border-[#D4AF37] bg-gradient-to-br from-amber-50/40 via-white to-amber-50/20 shadow-lg overflow-hidden animate-fade-in">
               <div className="bg-[#1A3636] text-white p-4 px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#D4AF37]">
-                <div className="flex items-center gap-2">
-                  <span className="p-1.5 rounded-md bg-[#D4AF37] text-[#1A3636]">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="p-1.5 rounded-md bg-[#D4AF37] text-[#1A3636] shrink-0">
                     <Sparkles className="w-4 h-4" />
                   </span>
-                  <div>
-                    <h3 className="font-bold text-sm tracking-wide text-white">
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-sm tracking-wide text-white break-words">
                       CONTRAPROPOSTA COMERCIAL DA CORRETORA VERA LÚCIA
                     </h3>
-                    <p className="text-[11px] text-[#D4AF37]">
+                    <p className="text-[11px] text-[#D4AF37] break-words">
                       Condições ajustadas para fechamento do negócio
                     </p>
                   </div>
                 </div>
 
-                <Badge className="bg-[#D4AF37] text-[#1A3636] font-bold text-xs">
+                <Badge className="bg-[#D4AF37] text-[#1A3636] font-bold text-xs shrink-0 whitespace-nowrap">
                   {activeProposal.status === 'accepted'
                     ? '✓ Aceita por Você'
                     : 'Aguardando Sua Decisão'}
                 </Badge>
               </div>
-
               <CardContent className="p-6 space-y-5">
                 {/* Personal note from Vera */}
                 {activeProposal.counter_offer.notes && (
@@ -704,41 +716,40 @@ export default function ClientPortal() {
 
                 {/* Values Comparison Table */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                  <div className="p-3.5 bg-white rounded-xl border border-gray-200 shadow-2xs">
+                  <div className="p-3.5 bg-white rounded-xl border border-gray-200 shadow-2xs min-w-0">
                     <span className="text-gray-400 block text-[11px]">Novo Valor Proposto</span>
-                    <span className="font-bold text-lg text-[#1A3636]">
+                    <span className="font-bold text-lg text-[#1A3636] break-all sm:break-normal">
                       R$ {activeProposal.counter_offer.value?.toLocaleString('pt-BR')}
                     </span>
                     {activeProposal.value && (
-                      <span className="text-[10px] text-gray-500 block mt-0.5">
+                      <span className="text-[10px] text-gray-500 block mt-0.5 break-words">
                         Sua proposta: R$ {activeProposal.value.toLocaleString('pt-BR')}
                       </span>
                     )}
                   </div>
 
-                  <div className="p-3.5 bg-white rounded-xl border border-gray-200 shadow-2xs">
+                  <div className="p-3.5 bg-white rounded-xl border border-gray-200 shadow-2xs min-w-0">
                     <span className="text-gray-400 block text-[11px]">Entrada Sugerida</span>
-                    <span className="font-bold text-base text-[#1A3636]">
+                    <span className="font-bold text-base text-[#1A3636] break-all sm:break-normal">
                       R${' '}
                       {activeProposal.counter_offer.down_payment?.toLocaleString('pt-BR') || '--'}
                     </span>
                   </div>
 
-                  <div className="p-3.5 bg-white rounded-xl border border-gray-200 shadow-2xs">
+                  <div className="p-3.5 bg-white rounded-xl border border-gray-200 shadow-2xs min-w-0">
                     <span className="text-gray-400 block text-[11px]">Financiamento</span>
-                    <span className="font-bold text-base text-emerald-800">
+                    <span className="font-bold text-base text-emerald-800 break-all sm:break-normal">
                       R${' '}
                       {activeProposal.counter_offer.financing_value?.toLocaleString('pt-BR') ||
                         '--'}
                     </span>
                     {activeProposal.counter_offer.bank_partner && (
-                      <span className="text-[10px] text-gray-500 block mt-0.5">
+                      <span className="text-[10px] text-gray-500 block mt-0.5 truncate">
                         {activeProposal.counter_offer.bank_partner}
                       </span>
                     )}
                   </div>
                 </div>
-
                 {/* Conditions / Terms */}
                 {(activeProposal.counter_offer.payment_terms ||
                   activeProposal.counter_offer.conditions) && (
@@ -834,21 +845,21 @@ export default function ClientPortal() {
 
                 <CardContent className="p-5 pt-0 space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100 text-xs">
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-gray-400 block text-[11px]">Valor Proposto</span>
-                      <span className="font-bold text-base text-[#1A3636]">
+                      <span className="font-bold text-base text-[#1A3636] break-all sm:break-normal">
                         R$ {activeProposal.value?.toLocaleString('pt-BR')}
                       </span>
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-gray-400 block text-[11px]">Entrada / Sinal</span>
-                      <span className="font-bold text-sm text-[#1A3636]">
+                      <span className="font-bold text-sm text-[#1A3636] break-all sm:break-normal">
                         R$ {activeProposal.down_payment?.toLocaleString('pt-BR') || '--'}
                       </span>
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-gray-400 block text-[11px]">Saldo Financiado</span>
-                      <span className="font-bold text-sm text-emerald-700">
+                      <span className="font-bold text-sm text-emerald-700 break-all sm:break-normal">
                         R$ {activeProposal.financing_value?.toLocaleString('pt-BR') || '--'}
                       </span>
                     </div>
@@ -865,21 +876,22 @@ export default function ClientPortal() {
                     </div>
                   )}
 
-                  <div className="flex justify-end gap-2 pt-2">
+                  <div className="flex flex-wrap justify-end gap-2 pt-2">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setActiveTab('proposal')}
-                      className="text-xs text-[#1A3636] border-gray-300"
+                      className="text-xs text-[#1A3636] border-gray-300 flex-1 sm:flex-initial"
                     >
                       Ajustar Termos da Proposta
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => setActiveTab('documents')}
-                      className="bg-[#1A3636] text-white hover:bg-[#254d4d] text-xs font-bold gap-1"
+                      className="bg-[#1A3636] text-white hover:bg-[#254d4d] text-xs font-bold gap-1 flex-1 sm:flex-initial"
                     >
-                      <UploadCloud className="w-3.5 h-3.5 text-[#D4AF37]" /> Enviar Documentação
+                      <UploadCloud className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />{' '}
+                      <span>Enviar Documentação</span>
                     </Button>
                   </div>
                 </CardContent>

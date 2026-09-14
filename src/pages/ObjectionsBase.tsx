@@ -237,19 +237,21 @@ export default function ObjectionsBase() {
         ) : (
           filtered.map((obj) => (
             <Card key={obj.id} className="card-elevated border-l-4 border-l-[#D4AF37]">
-              <CardHeader className="p-5 pb-3 flex flex-row items-start justify-between gap-4">
-                <div className="space-y-1">
+              <CardHeader className="p-5 pb-3 flex flex-row items-start justify-between gap-4 min-w-0">
+                <div className="space-y-1 min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <Badge
                       variant="outline"
-                      className="text-[10px] bg-gray-50 border-gray-300 text-gray-700"
+                      className="text-[10px] bg-gray-50 border-gray-300 text-gray-700 shrink-0"
                     >
                       {CATEGORIES.find((c) => c.key === obj.category)?.label || obj.category}
                     </Badge>
                   </div>
-                  <CardTitle className="text-base font-bold text-[#1A3636]">{obj.title}</CardTitle>
+                  <CardTitle className="text-base font-bold text-[#1A3636] break-words">
+                    {obj.title}
+                  </CardTitle>
                   {obj.description && (
-                    <p className="text-xs text-gray-600 italic">{obj.description}</p>
+                    <p className="text-xs text-gray-600 italic break-words">{obj.description}</p>
                   )}
                 </div>
 
@@ -280,7 +282,7 @@ export default function ObjectionsBase() {
                     <Sparkles className="w-4 h-4 text-[#D4AF37]" /> Roteiro & Argumentação
                     Recomendada (Vera AI):
                   </div>
-                  <p className="text-xs text-gray-800 leading-relaxed font-medium">
+                  <p className="text-xs text-gray-800 leading-relaxed font-medium break-words whitespace-pre-wrap">
                     {obj.ai_response || 'Nenhum roteiro cadastrado.'}
                   </p>
                 </div>

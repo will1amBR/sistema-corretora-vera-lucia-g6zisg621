@@ -285,12 +285,12 @@ export function FinancingSimulator({
 
             {/* Bank Comparison Grid / Cards */}
             <div className="space-y-3">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <h3 className="text-sm font-bold text-[#1A3636] flex items-center gap-1.5">
-                  <Building2 className="w-4 h-4 text-[#D4AF37]" /> Comparativo de Instituições
-                  Financeiras
+                  <Building2 className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                  <span>Comparativo de Instituições Financeiras</span>
                 </h3>
-                <span className="text-[11px] text-gray-500">
+                <span className="text-[11px] text-gray-500 shrink-0">
                   Prazo simulado: {termYears} anos (360 meses)
                 </span>
               </div>
@@ -335,11 +335,11 @@ export function FinancingSimulator({
 
                       <CardContent className="p-4 pt-1 space-y-3 text-xs">
                         <div className="p-3 bg-gray-50 rounded-lg space-y-1.5 border border-gray-100">
-                          <div className="flex justify-between items-baseline">
-                            <span className="text-gray-500 text-[11px]">
+                          <div className="flex justify-between items-baseline gap-2 flex-wrap">
+                            <span className="text-gray-500 text-[11px] shrink-0">
                               {amortizationType === 'SAC' ? '1ª Parcela (SAC):' : 'Parcela Fixa:'}
                             </span>
-                            <span className="font-black text-base text-[#1A3636]">
+                            <span className="font-black text-base text-[#1A3636] break-all sm:break-normal">
                               R$ {result.firstInstallment.toLocaleString('pt-BR')}
                             </span>
                           </div>

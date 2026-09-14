@@ -227,13 +227,13 @@ export function CRMKanbanCard({
       </div>
 
       {/* Value & Phone Footer */}
-      <div className="mt-3 pt-2.5 border-t border-gray-100 flex items-center justify-between gap-2 text-[11px]">
+      <div className="mt-3 pt-2.5 border-t border-gray-100 flex items-center justify-between gap-2 text-[11px] min-w-0">
         {potentialVal > 0 ? (
-          <div>
+          <div className="min-w-0">
             <span className="text-[9px] uppercase tracking-wider text-gray-400 block font-semibold leading-none">
               Potencial
             </span>
-            <span className="font-extrabold text-[#1A3636] text-xs">
+            <span className="font-extrabold text-[#1A3636] text-xs break-all sm:break-normal">
               R$ {potentialVal.toLocaleString('pt-BR')}
             </span>
           </div>
@@ -242,9 +242,9 @@ export function CRMKanbanCard({
         )}
 
         {client.phone && (
-          <span className="text-[10px] text-gray-500 flex items-center gap-1 font-mono">
-            <Phone className="w-3 h-3 text-[#D4AF37]" />
-            {client.phone}
+          <span className="text-[10px] text-gray-500 flex items-center gap-1 font-mono shrink-0 truncate">
+            <Phone className="w-3 h-3 text-[#D4AF37] shrink-0" />
+            <span className="truncate">{client.phone}</span>
           </span>
         )}
       </div>

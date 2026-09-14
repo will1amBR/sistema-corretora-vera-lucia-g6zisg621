@@ -1051,16 +1051,15 @@ export default function AdminProperties() {
                   </div>
 
                   {/* Right: Price + Status Select + Action Buttons */}
-                  <div className="flex flex-wrap lg:flex-col items-end justify-between w-full lg:w-auto gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-gray-100">
-                    <div className="text-left lg:text-right">
+                  <div className="flex flex-wrap lg:flex-col items-start sm:items-end justify-between w-full lg:w-auto gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-gray-100 min-w-0">
+                    <div className="text-left lg:text-right min-w-0">
                       <span className="text-xs text-gray-400 block font-medium">
                         Valor de Anúncio
                       </span>
-                      <span className="text-lg sm:text-xl font-extrabold text-[#1A3636]">
+                      <span className="text-lg sm:text-xl font-extrabold text-[#1A3636] break-all sm:break-normal">
                         R$ {prop.price?.toLocaleString('pt-BR')}
                       </span>
                     </div>
-
                     <div className="flex items-center gap-2">
                       {/* Inline status quick switch */}
                       <Select

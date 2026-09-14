@@ -334,12 +334,14 @@ export default function Properties() {
                   </div>
 
                   <CardHeader className="p-5 pb-3">
-                    <CardTitle className="text-base font-bold text-[#1A3636] line-clamp-1">
+                    <CardTitle className="text-base font-bold text-[#1A3636] line-clamp-1 break-words">
                       {prop.title}
                     </CardTitle>
-                    <CardDescription className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      {prop.neighborhood} • {prop.city}
+                    <CardDescription className="text-xs text-gray-500 flex items-center gap-1 mt-0.5 break-words">
+                      <MapPin className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                      <span className="truncate">
+                        {prop.neighborhood} • {prop.city}
+                      </span>
                     </CardDescription>
                   </CardHeader>
 
@@ -419,22 +421,23 @@ export default function Properties() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2 pt-1 border-t border-gray-200/60">
+                  <div className="flex flex-wrap gap-2 pt-1 border-t border-gray-200/60">
                     <a
                       href={getWhatsAppUrl(
                         `Olá Vera Lúcia! Tenho interesse no imóvel "${prop.title}" (${prop.neighborhood}, R$ ${prop.price?.toLocaleString('pt-BR')}). Poderia me passar mais detalhes?`,
                       )}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 shadow-xs"
+                      className="flex-1 min-w-[140px] bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 shadow-xs"
                     >
-                      <MessageCircle className="w-3.5 h-3.5 fill-white" /> Falar no WhatsApp
+                      <MessageCircle className="w-3.5 h-3.5 fill-white shrink-0" />{' '}
+                      <span>Falar no WhatsApp</span>
                     </a>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setViewingDetailProp(prop)}
-                      className="text-xs text-[#1A3636]"
+                      className="text-xs text-[#1A3636] shrink-0"
                     >
                       Ver Detalhes
                     </Button>

@@ -313,15 +313,19 @@ export default function PublicSchedule() {
                   className="w-full h-40 object-cover"
                 />
                 <CardContent className="p-4 space-y-2 text-xs">
-                  <Badge className="bg-[#1A3636] text-[#D4AF37] text-[10px]">
+                  <Badge className="bg-[#1A3636] text-[#D4AF37] text-[10px] w-fit">
                     Destaque Exclusivo
                   </Badge>
-                  <h4 className="font-bold text-sm text-[#1A3636]">{selectedProperty.title}</h4>
-                  <p className="text-gray-500 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    {selectedProperty.neighborhood} • {selectedProperty.city}
+                  <h4 className="font-bold text-sm text-[#1A3636] break-words">
+                    {selectedProperty.title}
+                  </h4>
+                  <p className="text-gray-500 flex items-center gap-1 break-words">
+                    <MapPin className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                    <span>
+                      {selectedProperty.neighborhood} • {selectedProperty.city}
+                    </span>
                   </p>
-                  <p className="font-bold text-base text-[#D4AF37] pt-1">
+                  <p className="font-bold text-base text-[#D4AF37] pt-1 break-all sm:break-normal">
                     R$ {selectedProperty.price?.toLocaleString('pt-BR')}
                   </p>
                 </CardContent>

@@ -191,20 +191,23 @@ export default function AssistantAI() {
                 )}
 
                 <div
-                  className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-xs ${
+                  className={`max-w-[85%] sm:max-w-[75%] min-w-0 break-words rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-xs ${
                     isAssistant
                       ? 'bg-white text-gray-800 border border-gray-100'
                       : 'bg-[#1A3636] text-white font-medium rounded-tr-none'
                   }`}
                 >
-                  <div className="whitespace-pre-wrap">{m.content}</div>
+                  <div className="whitespace-pre-wrap break-words">{m.content}</div>
 
                   {/* Citations if available */}
                   {m.citations && m.citations.length > 0 && (
-                    <div className="mt-3 pt-2 border-t border-gray-100 text-[11px] text-gray-500 space-y-1">
+                    <div className="mt-3 pt-2 border-t border-gray-100 text-[11px] text-gray-500 space-y-1 min-w-0">
                       <span className="font-semibold text-[#1A3636]">Fontes & Documentos:</span>
                       {m.citations.map((c, idx) => (
-                        <div key={idx} className="bg-gray-50 p-1.5 rounded text-[10px] italic">
+                        <div
+                          key={idx}
+                          className="bg-gray-50 p-1.5 rounded text-[10px] italic break-words"
+                        >
                           "{c.excerpt}"
                         </div>
                       ))}

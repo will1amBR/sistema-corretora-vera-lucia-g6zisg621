@@ -195,22 +195,22 @@ export function NegotiationTimeline({
       <CardContent className="p-6 space-y-6">
         {/* Header Summary */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-gray-100">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-6 bg-[#D4AF37] rounded-sm" />
-              <h3 className="font-bold text-base sm:text-lg text-[#1A3636]">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-2.5 h-6 bg-[#D4AF37] rounded-sm shrink-0" />
+              <h3 className="font-bold text-base sm:text-lg text-[#1A3636] break-words">
                 Linha do Tempo da Negociação Imobiliária
               </h3>
             </div>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-gray-500 mt-0.5 break-words">
               Etapa atual:{' '}
               <strong className="text-[#1A3636] font-bold">{currentStageObj.title}</strong>
               {propertyTitle ? ` • ${propertyTitle}` : ''}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Badge className="bg-[#1A3636] text-[#D4AF37] font-bold text-xs py-1 px-3 border-none">
+          <div className="flex items-center gap-2 shrink-0">
+            <Badge className="bg-[#1A3636] text-[#D4AF37] font-bold text-xs py-1 px-3 border-none whitespace-nowrap">
               Progresso: {percentComplete}%
             </Badge>
           </div>
@@ -316,9 +316,9 @@ export function NegotiationTimeline({
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
                     <h4
-                      className={`text-xs font-bold ${
+                      className={`text-xs font-bold break-words ${
                         isCurrent
                           ? 'text-[#1A3636]'
                           : isPassed
@@ -329,17 +329,17 @@ export function NegotiationTimeline({
                       {stage.title}
                     </h4>
                     {isCurrent && (
-                      <Badge className="bg-[#D4AF37] text-[#1A3636] text-[9px] font-bold uppercase">
+                      <Badge className="bg-[#D4AF37] text-[#1A3636] text-[9px] font-bold uppercase shrink-0">
                         Atual
                       </Badge>
                     )}
                     {isPassed && (
-                      <span className="text-[10px] text-emerald-600 font-semibold">
+                      <span className="text-[10px] text-emerald-600 font-semibold shrink-0 whitespace-nowrap">
                         ✓ Concluído
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-gray-500 mt-0.5 leading-tight">
+                  <p className="text-[11px] text-gray-500 mt-0.5 leading-tight break-words">
                     {stage.description}
                   </p>
                 </div>

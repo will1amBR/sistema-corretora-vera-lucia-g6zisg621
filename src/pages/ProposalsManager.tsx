@@ -314,43 +314,48 @@ export default function ProposalsManager() {
                 >
                   <div>
                     <CardHeader className="p-5 pb-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <CardTitle className="text-base font-bold text-[#1A3636]">
+                      <div className="flex items-start justify-between gap-2 min-w-0">
+                        <div className="min-w-0">
+                          <CardTitle className="text-base font-bold text-[#1A3636] break-words">
                             {client?.name || 'Cliente'}
                           </CardTitle>
-                          <CardDescription className="text-xs text-[#D4AF37] font-semibold flex items-center gap-1 mt-0.5">
-                            <Building2 className="w-3.5 h-3.5" /> {property?.title || 'Imóvel'}
+                          <CardDescription className="text-xs text-[#D4AF37] font-semibold flex items-center gap-1 mt-0.5 break-words">
+                            <Building2 className="w-3.5 h-3.5 shrink-0" />{' '}
+                            <span className="break-words">{property?.title || 'Imóvel'}</span>
                           </CardDescription>
                         </div>
 
-                        <Badge className={`text-[10px] font-bold ${statusCfg.color} border-none`}>
+                        <Badge
+                          className={`text-[10px] font-bold ${statusCfg.color} border-none shrink-0 whitespace-nowrap`}
+                        >
                           {statusCfg.label}
                         </Badge>
                       </div>
                     </CardHeader>
 
-                    <CardContent className="p-5 pt-0 space-y-3 text-xs">
+                    <CardContent className="p-5 pt-0 space-y-3 text-xs min-w-0">
                       {/* Financial Values */}
-                      <div className="p-3 bg-gray-50 rounded-lg border space-y-1.5">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-500">Valor da Proposta:</span>
-                          <span className="font-bold text-sm text-[#1A3636]">
+                      <div className="p-3 bg-gray-50 rounded-lg border space-y-1.5 min-w-0">
+                        <div className="flex justify-between items-center flex-wrap gap-1">
+                          <span className="text-gray-500 shrink-0">Valor da Proposta:</span>
+                          <span className="font-bold text-sm text-[#1A3636] break-all sm:break-normal">
                             R$ {prop.value?.toLocaleString('pt-BR')}
                           </span>
                         </div>
                         {prop.down_payment ? (
-                          <div className="flex justify-between items-center text-gray-600">
-                            <span>Entrada / Sinal:</span>
-                            <span className="font-semibold">
+                          <div className="flex justify-between items-center text-gray-600 flex-wrap gap-1">
+                            <span className="shrink-0">Entrada / Sinal:</span>
+                            <span className="font-semibold break-all sm:break-normal">
                               R$ {prop.down_payment.toLocaleString('pt-BR')}
                             </span>
                           </div>
                         ) : null}
                         {prop.financing_value ? (
-                          <div className="flex justify-between items-center text-gray-600">
-                            <span>Financiamento ({prop.bank_partner || 'Banco'}):</span>
-                            <span className="font-semibold">
+                          <div className="flex justify-between items-center text-gray-600 flex-wrap gap-1">
+                            <span className="shrink-0">
+                              Financiamento ({prop.bank_partner || 'Banco'}):
+                            </span>
+                            <span className="font-semibold break-all sm:break-normal">
                               R$ {prop.financing_value.toLocaleString('pt-BR')}
                             </span>
                           </div>

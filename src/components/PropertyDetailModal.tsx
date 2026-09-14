@@ -136,14 +136,16 @@ export default function PropertyDetailModal({
         {/* Content Body */}
         <div className="p-6 space-y-6">
           {/* Title and Address */}
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#1A3636] leading-snug">
+          <div className="min-w-0">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#1A3636] leading-snug break-words">
               {property.title}
             </h2>
-            <p className="text-sm text-gray-500 flex items-center gap-1.5 mt-1">
-              <MapPin className="w-4 h-4 text-[#D4AF37]" />
-              {property.address ? `${property.address}, ` : ''}
-              {property.neighborhood} — {property.city || 'Porto Alegre - RS'}
+            <p className="text-sm text-gray-500 flex items-center gap-1.5 mt-1 break-words">
+              <MapPin className="w-4 h-4 text-[#D4AF37] shrink-0" />
+              <span>
+                {property.address ? `${property.address}, ` : ''}
+                {property.neighborhood} — {property.city || 'Porto Alegre - RS'}
+              </span>
             </p>
           </div>
 
@@ -208,19 +210,19 @@ export default function PropertyDetailModal({
           )}
 
           {/* Broker Guarantee Card */}
-          <div className="p-4 rounded-xl bg-gradient-to-br from-[#1A3636] to-[#254d4d] text-white flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+          <div className="p-4 rounded-xl bg-gradient-to-br from-[#1A3636] to-[#254d4d] text-white flex items-center justify-between gap-4 min-w-0">
+            <div className="flex items-center gap-3 min-w-0">
               <img
                 src="https://img.usecurling.com/ppl/128?gender=female&seed=44"
                 alt="Vera Lúcia Koren"
                 className="w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shrink-0"
               />
-              <div>
-                <h4 className="font-bold text-sm text-white">Vera Lúcia Koren</h4>
-                <p className="text-xs text-[#D4AF37]">
+              <div className="min-w-0">
+                <h4 className="font-bold text-sm text-white break-words">Vera Lúcia Koren</h4>
+                <p className="text-xs text-[#D4AF37] break-words">
                   CRECI {BROKER_CRECI} • Foxter Cia. Imobiliária
                 </p>
-                <p className="text-[11px] text-white/80 mt-0.5">
+                <p className="text-[11px] text-white/80 mt-0.5 break-words">
                   Atendimento calmo, seguro e suporte integral em financiamento bancário e
                   documentação.
                 </p>

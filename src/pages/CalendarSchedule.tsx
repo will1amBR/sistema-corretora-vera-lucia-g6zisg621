@@ -276,16 +276,19 @@ export default function CalendarSchedule() {
                 className="card-elevated hover:shadow-md transition-shadow border-l-4 border-l-[#1A3636]"
               >
                 <CardContent className="p-5 space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="font-bold text-sm text-[#1A3636]">{evt.client_name}</h4>
-                      <p className="text-xs text-[#D4AF37] font-semibold flex items-center gap-1 mt-0.5">
-                        <Building2 className="w-3.5 h-3.5" /> {evt.property_title}
+                  <div className="flex items-start justify-between gap-2 min-w-0">
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-sm text-[#1A3636] break-words">
+                        {evt.client_name}
+                      </h4>
+                      <p className="text-xs text-[#D4AF37] font-semibold flex items-center gap-1 mt-0.5 break-words">
+                        <Building2 className="w-3.5 h-3.5 shrink-0" />{' '}
+                        <span className="break-words">{evt.property_title}</span>
                       </p>
                     </div>
                     <Badge
                       variant="outline"
-                      className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-300"
+                      className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-300 shrink-0 whitespace-nowrap"
                     >
                       Confirmada
                     </Badge>

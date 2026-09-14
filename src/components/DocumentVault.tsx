@@ -449,20 +449,20 @@ export function DocumentVault({
     <Card className="card-elevated border-t-4 border-t-[#1A3636] overflow-hidden">
       {/* Header Banner */}
       <CardHeader className="p-5 sm:p-6 pb-4 bg-gradient-to-r from-gray-50 via-white to-amber-50/20 border-b border-gray-100">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="p-2 rounded-lg bg-[#1A3636] text-[#D4AF37] shadow-xs">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 min-w-0">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="p-2 rounded-lg bg-[#1A3636] text-[#D4AF37] shadow-xs shrink-0">
                 <UploadCloud className="w-5 h-5" />
               </span>
-              <div>
-                <CardTitle className="text-lg font-bold text-[#1A3636] flex items-center gap-2">
-                  Cofre Digital de Documentos
-                  <Badge className="bg-[#1A3636] text-[#D4AF37] text-[10px] font-bold border-none">
+              <div className="min-w-0">
+                <CardTitle className="text-lg font-bold text-[#1A3636] flex items-center gap-2 flex-wrap">
+                  <span className="break-words">Cofre Digital de Documentos</span>
+                  <Badge className="bg-[#1A3636] text-[#D4AF37] text-[10px] font-bold border-none shrink-0">
                     Auditoria Completa
                   </Badge>
                 </CardTitle>
-                <CardDescription className="text-xs text-gray-500">
+                <CardDescription className="text-xs text-gray-500 break-words">
                   Modalidade ativa:{' '}
                   <strong className="text-[#1A3636] capitalize">
                     {activeModality.replace('_', ' ')}
@@ -473,8 +473,8 @@ export function DocumentVault({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge className="bg-[#1A3636] text-[#D4AF37] text-xs font-bold px-3 py-1.5 border-none shadow-xs">
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <Badge className="bg-[#1A3636] text-[#D4AF37] text-xs font-bold px-3 py-1.5 border-none shadow-xs whitespace-nowrap">
               {uploadedCount} de {totalRequired} enviados ({completionPercent}%)
             </Badge>
           </div>
@@ -777,14 +777,14 @@ export function DocumentVault({
                   </div>
 
                   {/* Upload or View Action Row */}
-                  <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+                  <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between gap-2 min-w-0">
                     {uploaded ? (
-                      <div className="flex items-center justify-between w-full flex-wrap gap-2">
-                        <span className="text-[11px] text-gray-500 truncate max-w-[150px]">
+                      <div className="flex items-center justify-between w-full flex-wrap gap-2 min-w-0">
+                        <span className="text-[11px] text-gray-500 truncate max-w-[180px] sm:max-w-[240px]">
                           {uploaded.title}
                         </span>
 
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
                           {uploaded.file && (
                             <Button
                               variant="outline"

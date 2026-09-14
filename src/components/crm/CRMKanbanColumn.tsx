@@ -199,16 +199,16 @@ export function CRMKanbanColumn({
       </div>
 
       {/* Column Footer: Total footer count summary */}
-      <div className="p-2 px-3 bg-white/80 border-t border-gray-200/70 rounded-b-2xl text-[10px] text-gray-500 flex items-center justify-between">
-        <span>
+      <div className="p-2 px-3 bg-white/80 border-t border-gray-200/70 rounded-b-2xl text-[10px] text-gray-500 flex items-center justify-between flex-wrap gap-1 min-w-0">
+        <span className="shrink-0">
           {clients.length} {clients.length === 1 ? 'cliente' : 'clientes'}
         </span>
         {totalColumnValue > 0 ? (
-          <span className="font-semibold text-gray-700">
+          <span className="font-semibold text-gray-700 truncate">
             Total: R$ {totalColumnValue.toLocaleString('pt-BR')}
           </span>
         ) : (
-          <span>Sem valor alocado</span>
+          <span className="shrink-0">Sem valor alocado</span>
         )}
       </div>
     </div>

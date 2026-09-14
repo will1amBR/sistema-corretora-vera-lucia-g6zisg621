@@ -384,18 +384,30 @@ export function ClientDetailDrawer({
           </div>
 
           <Tabs defaultValue="geral" className="w-full">
-            <TabsList className="grid grid-cols-4 mb-4 bg-gray-100 p-1">
-              <TabsTrigger value="geral" className="text-xs">
-                Perfil & Contatos
+            <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-1 mb-4 bg-gray-100 p-1 h-auto">
+              <TabsTrigger
+                value="geral"
+                className="text-xs py-2 px-1 text-center whitespace-normal"
+              >
+                <span className="truncate">Perfil & Contatos</span>
               </TabsTrigger>
-              <TabsTrigger value="financeiro" className="text-xs">
-                Financeiro
+              <TabsTrigger
+                value="financeiro"
+                className="text-xs py-2 px-1 text-center whitespace-normal"
+              >
+                <span className="truncate">Financeiro</span>
               </TabsTrigger>
-              <TabsTrigger value="documentos" className="text-xs">
-                Documentos ({clientDocuments.length})
+              <TabsTrigger
+                value="documentos"
+                className="text-xs py-2 px-1 text-center whitespace-normal"
+              >
+                <span className="truncate">Documentos ({clientDocuments.length})</span>
               </TabsTrigger>
-              <TabsTrigger value="imoveis" className="text-xs">
-                Imóveis ({interestedProps.length})
+              <TabsTrigger
+                value="imoveis"
+                className="text-xs py-2 px-1 text-center whitespace-normal"
+              >
+                <span className="truncate">Imóveis ({interestedProps.length})</span>
               </TabsTrigger>
             </TabsList>
 

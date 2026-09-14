@@ -241,19 +241,19 @@ export function ClientProposalForm({
   return (
     <Card className="card-elevated border-t-4 border-t-[#D4AF37] overflow-hidden">
       <CardHeader className="p-6 pb-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="p-2 rounded-lg bg-[#1A3636] text-[#D4AF37] shadow-xs">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 min-w-0">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="p-2 rounded-lg bg-[#1A3636] text-[#D4AF37] shadow-xs shrink-0">
                 <FileCheck className="w-5 h-5" />
               </span>
-              <div>
-                <CardTitle className="text-lg font-bold text-[#1A3636]">
+              <div className="min-w-0">
+                <CardTitle className="text-lg font-bold text-[#1A3636] break-words">
                   {activeProposal
                     ? 'Minha Proposta Comercial Ativa'
                     : 'Enviar Nova Proposta de Compra'}
                 </CardTitle>
-                <CardDescription className="text-xs text-gray-500">
+                <CardDescription className="text-xs text-gray-500 break-words">
                   Estruture os valores, percentual de entrada e condições de pagamento para o
                   proprietário.
                 </CardDescription>
@@ -261,7 +261,7 @@ export function ClientProposalForm({
             </div>
           </div>
 
-          <Badge className="bg-emerald-100 text-emerald-800 font-bold text-xs py-1 px-3">
+          <Badge className="bg-emerald-100 text-emerald-800 font-bold text-xs py-1 px-3 shrink-0 whitespace-nowrap">
             Garantia Foxter & Vera Lúcia Koren
           </Badge>
         </div>
@@ -288,17 +288,17 @@ export function ClientProposalForm({
             </Select>
 
             {selectedProperty && (
-              <div className="p-3 bg-gray-50 rounded-lg text-xs text-gray-600 flex flex-wrap justify-between items-center gap-2 border border-gray-200">
-                <span>
+              <div className="p-3 bg-gray-50 rounded-lg text-xs text-gray-600 flex flex-wrap justify-between items-center gap-2 border border-gray-200 min-w-0">
+                <span className="break-words">
                   Pedida Original:{' '}
                   <strong className="text-[#1A3636]">
                     R$ {selectedProperty.price?.toLocaleString('pt-BR')}
                   </strong>
                 </span>
-                <span>
+                <span className="break-words">
                   Localização: {selectedProperty.address}, {selectedProperty.neighborhood}
                 </span>
-                <span>Área: {selectedProperty.area_sqm} m²</span>
+                <span className="shrink-0">Área: {selectedProperty.area_sqm} m²</span>
               </div>
             )}
           </div>
