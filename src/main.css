@@ -121,6 +121,15 @@
     border: 1px solid rgba(212, 175, 55, 0.2);
   }
 
+  /* Hide scrollbar utility */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   /* Custom scrollbar for modern sleek feel */
   ::-webkit-scrollbar {
     width: 6px;

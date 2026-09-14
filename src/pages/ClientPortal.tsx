@@ -626,42 +626,53 @@ export default function ClientPortal() {
         onValueChange={(val) => setActiveTab(val as any)}
         className="w-full space-y-6 min-w-0"
       >
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1 bg-gray-100 p-1.5 rounded-xl h-auto">
-          <TabsTrigger
-            value="overview"
-            className="text-xs py-2.5 px-2 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-center whitespace-normal"
-          >
-            <Clock className="w-3.5 h-3.5 shrink-0 text-[#D4AF37]" />
-            <span className="truncate">Status</span>
-            <span className="hidden sm:inline">da Negociação</span>
-          </TabsTrigger>
+        <div className="w-full overflow-x-auto no-scrollbar pb-1">
+          <TabsList className="inline-flex sm:grid sm:grid-cols-4 w-auto min-w-full gap-1.5 bg-gray-100 p-1.5 rounded-xl h-auto">
+            <TabsTrigger
+              value="overview"
+              className="text-xs py-2.5 px-3 sm:px-2 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-center whitespace-nowrap min-w-0 flex-1 shrink-0 transition-colors"
+            >
+              <Clock className="w-3.5 h-3.5 shrink-0 text-[#D4AF37]" />
+              <span className="truncate">
+                <span className="sm:hidden">Status</span>
+                <span className="hidden sm:inline">Status da Negociação</span>
+              </span>
+            </TabsTrigger>
 
-          <TabsTrigger
-            value="proposal"
-            className="text-xs py-2.5 px-2 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-center whitespace-normal"
-          >
-            <FileText className="w-3.5 h-3.5 shrink-0 text-[#D4AF37]" />
-            <span className="truncate">Minha Proposta</span>
-          </TabsTrigger>
+            <TabsTrigger
+              value="proposal"
+              className="text-xs py-2.5 px-3 sm:px-2 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-center whitespace-nowrap min-w-0 flex-1 shrink-0 transition-colors"
+            >
+              <FileText className="w-3.5 h-3.5 shrink-0 text-[#D4AF37]" />
+              <span className="truncate">
+                <span className="sm:hidden">Proposta</span>
+                <span className="hidden sm:inline">Minha Proposta</span>
+              </span>
+            </TabsTrigger>
 
-          <TabsTrigger
-            value="documents"
-            className="text-xs py-2.5 px-2 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-center whitespace-normal"
-          >
-            <UploadCloud className="w-3.5 h-3.5 shrink-0 text-[#D4AF37]" />
-            <span className="truncate">Cofre</span>
-            <span className="hidden sm:inline">de Documentos</span>
-          </TabsTrigger>
+            <TabsTrigger
+              value="documents"
+              className="text-xs py-2.5 px-3 sm:px-2 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-center whitespace-nowrap min-w-0 flex-1 shrink-0 transition-colors"
+            >
+              <UploadCloud className="w-3.5 h-3.5 shrink-0 text-[#D4AF37]" />
+              <span className="truncate">
+                <span className="sm:hidden">Documentos</span>
+                <span className="hidden sm:inline">Cofre de Documentos</span>
+              </span>
+            </TabsTrigger>
 
-          <TabsTrigger
-            value="simulator"
-            className="text-xs py-2.5 px-2 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-center whitespace-normal"
-          >
-            <Calculator className="w-3.5 h-3.5 shrink-0 text-[#D4AF37]" />
-            <span className="truncate">Simulador</span>
-            <span className="hidden sm:inline">de Financiamento</span>
-          </TabsTrigger>
-        </TabsList>
+            <TabsTrigger
+              value="simulator"
+              className="text-xs py-2.5 px-3 sm:px-2 font-bold data-[state=active]:bg-[#1A3636] data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-center whitespace-nowrap min-w-0 flex-1 shrink-0 transition-colors"
+            >
+              <Calculator className="w-3.5 h-3.5 shrink-0 text-[#D4AF37]" />
+              <span className="truncate">
+                <span className="sm:hidden">Simulador</span>
+                <span className="hidden sm:inline">Simulador de Financiamento</span>
+              </span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* TAB 1: OVERVIEW & NEGOTIATION TIMELINE */}
         <TabsContent value="overview" className="space-y-6">
